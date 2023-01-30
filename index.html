@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+      .form-group {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary mr-2" onclick="showLoginForm()">Login</button>
+        <button class="btn btn-primary" onclick="showRegisterForm()">Register</button>
+      </div>
+      <div id="loginForm" class="form-group">
+        <form action="login.php" method="post">
+          <h3>Login</h3>
+          <input type="text" name="username" placeholder="Username">
+          <input type="password" name="password" placeholder="Password">
+          <input type="submit" value="Login">
+        </form>
+      </div>
+      <div id="registerForm" class="form-group">
+        <form action="register.php" method="post">
+          <h3>Register</h3>
+          <input type="text" name="username" placeholder="Username">
+          <input type="password" name="password" placeholder="Password">
+          <input type="password" name="confirmPassword" placeholder="Confirm Password">
+          <input type="submit" value="Register">
+        </form>
+      </div>
+    </div>
+    <script>
+      function showLoginForm() {
+        document.querySelector('#loginForm').style.display = 'flex';
+        document.querySelector('#registerForm').style.display = 'none';
+      }
+      function showRegisterForm() {
+        document.querySelector('#registerForm').style.display = 'flex';
+        document.querySelector('#loginForm').style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
