@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <style>
+    button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .play-btn {
+      width: 200px;
+      margin: 20px auto;
+    }
+    .waiting-room {
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Lobby</h1>
+    <div class="text-center play-btn">
+      <button class="btn btn-primary" id="playBtn">Play</button>
+    </div>
+    <div class="waiting-room">
+      <h2>Waiting for another player...</h2>
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <br>
+      <button class="btn btn-danger" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+  <script>
+	  const playBtn = document.querySelector("#playBtn");
+	  const cancelBtn = document.querySelector("#cancelBtn");
+	  const waitingRoom = document.querySelector(".waiting-room");
+	  playBtn.addEventListener("click", function() {
+				playBtn.style.display = "none";
+				waitingRoom.style.display = "block";
+			});
+
+	  cancelBtn.addEventListener("click", function() {
+				playBtn.style.display = "block";
+				waitingRoom.style.display = "none";
+			});
+  </script>
+</body>
+</html>
