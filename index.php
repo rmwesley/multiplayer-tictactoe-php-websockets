@@ -11,11 +11,6 @@ if (isset($_SESSION['error'])) {
 <html>
   <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <style>
-      .form-group {
-        display: none;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
@@ -23,7 +18,7 @@ if (isset($_SESSION['error'])) {
         <button class="btn btn-primary mr-2" onclick="showLoginForm()">Login</button>
         <button class="btn btn-primary" onclick="showRegisterForm()">Register</button>
       </div>
-      <div id="loginForm" class="form-group">
+      <div id="loginForm" class="d-none">
         <form action="login.php" method="post">
           <h3>Login</h3>
           <input type="text" name="username" placeholder="Username">
@@ -31,7 +26,7 @@ if (isset($_SESSION['error'])) {
           <input type="submit" value="Login">
         </form>
       </div>
-      <div id="registerForm" class="form-group">
+      <div id="registerForm" class="d-none">
         <form action="register.php" method="post">
           <h3>Register</h3>
           <input type="text" name="username" placeholder="Username">
@@ -42,13 +37,16 @@ if (isset($_SESSION['error'])) {
       </div>
     </div>
     <script>
+      const loginBtn = document.querySelector('#loginForm');
+      const registerBtn = document.querySelector('#registerForm');
+
       function showLoginForm() {
-        document.querySelector('#loginForm').style.display = 'flex';
-        document.querySelector('#registerForm').style.display = 'none';
+        loginBtn.classList.remove('d-none');
+        registerBtn.classList.add('d-none');
       }
       function showRegisterForm() {
-        document.querySelector('#registerForm').style.display = 'flex';
-        document.querySelector('#loginForm').style.display = 'none';
+        registerBtn.classList.remove('d-none');
+        loginBtn.classList.add('d-none');
       }
     </script>
   </body>

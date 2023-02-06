@@ -3,13 +3,13 @@ window.onload = init;
 
 var game = [];
 function mark_x(event){
-	if(event.target.innerHTML == "&nbsp;"){
-		event.target.innerHTML = "x";
-		indices = event.target.id.split(",");
-		i = parseInt(indices[0])
-		j = parseInt(indices[1])
-		game[i][j] = 1;
-	}
+	if(event.target.tagName != "BUTTON") return;
+	event.target.innerHTML = "x";
+	event.target.disabled = true;
+	indices = event.target.id.split(",");
+	i = parseInt(indices[0])
+	j = parseInt(indices[1])
+	game[i][j] = 1;
 }
 function init(){
 	var board = document.getElementById("board");
@@ -22,6 +22,7 @@ function init(){
 			game[i] = game[i].concat([null]);
 			var button = document.createElement('button');
 			button.innerHTML = "&nbsp;"
+			button.className = "btn-sq";
 			button.id = i + "," + j
 			newLine.appendChild(button);
 			//newLine.innerHTML += " | ";

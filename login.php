@@ -16,12 +16,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		exit;
 	}
 	$row = mysqli_fetch_assoc($result);
-	if (password_verify($password, $row['password'])) {
-		header("Location: redirection.html");
+	if (!password_verify($password, $row['password'])) {
+		$_SESSION['error'] = "Password is incorrect.";
+		header("Location: index.php");
 		exit;
 	}
-	$_SESSION['error'] = "Password is incorrect.";
-	header("Location: index.php");
+	$_SESSION['username'] = $username;
+	header("Location: redirection.php");
 }
 
 mysqli_close($conn);
