@@ -12,10 +12,14 @@ session_start();
       <?= $_SESSION['username'] ?>
     </button>
   </div>
-	<div class="spinner-border" role="status">
-      <span class="sr-only">Redirecting...</span>
-	</div>
-  Welcome!
+    <div class="container text-center">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Redirecting...</span>
+      </div>
+      <div>
+        Welcome!
+      </div>
+  </div>
 	<script>
       setTimeout(function () {
         window.location.href = "lobby.php";
