@@ -33,6 +33,8 @@ session_start();
     </div>
   </div>
   <script src="lobby-btns.js"></script>
+  <script src="is-in-queue.js"></script>
+  <script src="ping-queue.js"></script>
   <script src="profile.js"></script>
 </body>
 </html>
