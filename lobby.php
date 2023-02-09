@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 session_start();
 ?>
@@ -11,7 +10,7 @@ session_start();
 </head>
 <body>
   <div class="d-flex justify-content-end">
-    <button class="btn btn-primary mr-2" onclick="showProfileInfo()">
+	<button class="btn btn-primary mr-2" onclick="showProfileInfo()">
       <?= $_SESSION['username'] ?>
     </button>
   </div>
@@ -32,9 +31,9 @@ session_start();
       </div>
     </div>
   </div>
-  <script src="lobby-btns.js"></script>
-  <script src="is-in-queue.js"></script>
-  <script src="ping-queue.js"></script>
-  <script src="profile.js"></script>
+  <script src="assets/js/lobby-btns.js"></script>
+  <script src="assets/js/is-in-queue.js"></script>
+  <script src="assets/js/ping-queue.js"></script>
+  <script src="assets/js/profile.js"></script>
 </body>
 </html>

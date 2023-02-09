@@ -1,10 +1,6 @@
 <!-- Code to display registration form -->
 <?php
 session_start();
-if (isset($_SESSION['error'])) {
-  echo "<p style='color:red'>" . $_SESSION['error'] . "</p>";
-  unset($_SESSION['error']);
-}
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +15,7 @@ if (isset($_SESSION['error'])) {
         <button class="btn btn-primary" onclick="showRegisterForm()">Register</button>
       </div>
       <div id="loginForm" class="d-none">
-        <form action="login.php" method="post">
+        <form action="api/login.php" method="post">
           <h3>Login</h3>
           <input type="text" name="username" placeholder="Username">
           <input type="password" name="password" placeholder="Password">
@@ -27,7 +23,7 @@ if (isset($_SESSION['error'])) {
         </form>
       </div>
       <div id="registerForm" class="d-none">
-        <form action="register.php" method="post">
+        <form action="api/register.php" method="post">
           <h3>Register</h3>
           <input type="text" name="username" placeholder="Username">
           <input type="password" name="password" placeholder="Password">
@@ -36,6 +32,6 @@ if (isset($_SESSION['error'])) {
         </form>
       </div>
     </div>
-    <script src="index-btns.js"></script>
+    <script src="assets/js/index-btns.js"></script>
   </body>
 </html>

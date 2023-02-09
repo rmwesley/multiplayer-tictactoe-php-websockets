@@ -22,7 +22,7 @@ function play(){
 
 	// make an AJAX call to add username to match_queue table
 	const xhr = new XMLHttpRequest();
-	xhr.open("POST", "enqueue.php", true);
+	xhr.open("POST", "api/enqueue.php", true);
 	xhr.send();
 }
 
@@ -30,7 +30,7 @@ function cancel(){
 	hideWaitingRoom();
 
 	const xhr = new XMLHttpRequest();
-	xhr.open("GET", "dequeue.php", true);
+	xhr.open("GET", "api/dequeue.php", true);
 	xhr.send();
 
 }
