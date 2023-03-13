@@ -25,16 +25,10 @@ function hideWaitingRoom(){
 
 function play(){
 	showWaitingRoom();
-
-	// send message to server to add user to the matchmaking queue
-	usernamePromise.then((username) => {
-		ws.send(JSON.stringify({ type: "enqueue", username: username }));
-	});
+	clientWebSocketInit();
 }
 
 function cancel(){
 	hideWaitingRoom();
-
-	// send message to server to remove user from the matchmaking queue
-	ws.send(JSON.stringify({ type: "dequeue" }));
+	ws.close();
 }

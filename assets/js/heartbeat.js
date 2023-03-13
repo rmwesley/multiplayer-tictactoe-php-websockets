@@ -2,9 +2,9 @@ function sendPing() {
 	// Don't send ping if tab is not active or Play has not been pressed
 	if(!pressedPlay || document.visibilityState !== "visible") return; 
 
-	console.log("Pinging...");
+	// Ping the server to keep connection alive
 	usernamePromise.then((username) => {
-		ws.send(JSON.stringify({ type: "ping", username: username }));
+		window.ws.send(JSON.stringify({ type: "ping", username: username }));
 	});
 }
 

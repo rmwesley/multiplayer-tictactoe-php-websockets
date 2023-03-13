@@ -59,9 +59,6 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 			$username = $payload['username'];
 			$this->enqueue($username, $from->resourceId);
 			break;
-		case 'dequeue':
-			$this->dequeue($from->resourceId);
-			break;
 		case 'ping':
 			$sql = "SELECT * FROM match_queue WHERE websocket_id = '$ws_id'";
 			$result = $this->db->query($sql);
@@ -86,9 +83,17 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 		$result = $this->db->query($query);
 
 		while ($row = $result->fetch_assoc()) {
-			$username = $row['username'];
 			$ws_id = $row['websocket_id'];
 			$this->dequeue($ws_id);
+
+			// Sending 'inactive' message to client
+			$response = json_encode(array(
+				'type' => 'inactive',
+			));
+			$this->connectionsMap[$ws_id]->send($response);
+
+			// Closing connection manually
+			$this->connectionsMap[$ws_id]->close();
 		}
 	}
 

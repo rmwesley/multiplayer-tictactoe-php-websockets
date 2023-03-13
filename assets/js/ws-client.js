@@ -1,19 +1,18 @@
-const ws = new WebSocket("ws://localhost:8080");
+function clientWebSocketInit() {
+	window.ws = new WebSocket("ws://localhost:8080");
 
-ws.onopen = function () {
-	console.log("WebSocket connection established.");
-};
+	window.ws.onopen = function () {
+		// Send message to server to add user to the matchmaking queue
+		usernamePromise.then((username) => {
+			this.send(JSON.stringify({ type: "enqueue", username: username }));
+		});
+	};
 
-ws.onclose = function () {
-	console.log("WebSocket connection closed.");
-};
-
-ws.onerror = function () {
-	console.log("WebSocket error.");
-};
-
-// Handle an inactivity message from the server
-ws.addEventListener('message', (event) => {
-	const message = JSON.parse(event.data);
-	if(message.type == 'inactive') showInactivityPopup();
-});
+	window.ws.onerror = function () {
+		console.log("WebSocket error.");
+	};
+	window.ws.onmessage = (event) => {
+		message = event.data;
+		if(message.type = 'inactive') showInactivityPopup();
+	}
+}
