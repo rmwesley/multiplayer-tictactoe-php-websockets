@@ -62,6 +62,12 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 		case 'dequeue':
 			$this->dequeue($from->resourceId);
 			break;
+		case 'ping':
+			$sql = "UPDATE match_queue SET last_heartbeat_ts = NOW() WHERE websocket_id = '$ws_id'";
+			$this->db->query($sql);
+			break;
+
+			// Code for handling other message types
 		}
 	}
 
