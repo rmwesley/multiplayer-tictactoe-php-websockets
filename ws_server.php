@@ -63,11 +63,32 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 			$this->dequeue($from->resourceId);
 			break;
 		case 'ping':
-			$sql = "UPDATE match_queue SET last_heartbeat_ts = NOW() WHERE websocket_id = '$ws_id'";
-			$this->db->query($sql);
+			$sql = "SELECT * FROM match_queue WHERE websocket_id = '$ws_id'";
+			$result = $this->db->query($sql);
+			if ($result->num_rows > 0) {
+				$sql = "UPDATE match_queue SET last_heartbeat_ts = NOW() WHERE websocket_id = '$ws_id'";
+				$this->db->query($sql);
+			} else {
+				$response = json_encode(array(
+					'type' => 'inactive',
+				));
+				$from->send($response);
+			}
 			break;
 
 			// Code for handling other message types
+		}
+	}
+
+	public function queueCleaner() {
+		$threshold = time() - 6;
+		$query = "SELECT * FROM match_queue WHERE UNIX_TIMESTAMP(last_heartbeat_ts) < $threshold";
+		$result = $this->db->query($query);
+
+		while ($row = $result->fetch_assoc()) {
+			$username = $row['username'];
+			$ws_id = $row['websocket_id'];
+			$this->dequeue($ws_id);
 		}
 	}
 
@@ -87,5 +108,9 @@ $server = IoServer::factory(
 	),
 	8080
 );
+
+$server->loop->addPeriodicTimer(3, function () use ($tictactoe) {
+	$tictactoe->queueCleaner();
+});
 
 $server->run();

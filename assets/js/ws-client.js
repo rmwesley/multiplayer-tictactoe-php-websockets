@@ -11,3 +11,9 @@ ws.onclose = function () {
 ws.onerror = function () {
 	console.log("WebSocket error.");
 };
+
+// Handle an inactivity message from the server
+ws.addEventListener('message', (event) => {
+	const message = JSON.parse(event.data);
+	if(message.type == 'inactive') showInactivityPopup();
+});
