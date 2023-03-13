@@ -1,6 +1,12 @@
 const playBtn = document.querySelector("#playBtn");
 const cancelBtn = document.querySelector("#cancelBtn");
 const waitingRoom = document.querySelector("#waiting-room");
+const profileBtn = document.getElementById("profile-btn");
+
+usernamePromise.then((username) => {
+	profileBtn.innerHTML = username;
+})
+
 var pressedPlay = false;
 
 function showWaitingRoom(){
@@ -20,17 +26,15 @@ function hideWaitingRoom(){
 function play(){
 	showWaitingRoom();
 
-	// make an AJAX call to add username to match_queue table
-	const xhr = new XMLHttpRequest();
-	xhr.open("POST", "api/enqueue.php", true);
-	xhr.send();
+	// send message to server to add user to the matchmaking queue
+	usernamePromise.then((username) => {
+		ws.send(JSON.stringify({ type: "enqueue", username: username }));
+	});
 }
 
 function cancel(){
 	hideWaitingRoom();
 
-	const xhr = new XMLHttpRequest();
-	xhr.open("GET", "api/dequeue.php", true);
-	xhr.send();
-
+	// send message to server to remove user from the matchmaking queue
+	ws.send(JSON.stringify({ type: "dequeue" }));
 }

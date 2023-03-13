@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-include_once("db.php");
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../config/db.php';
 
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
