@@ -10,11 +10,15 @@ require_once __DIR__ . '/../config/db.php';
 
 class TicTacToe implements Ratchet\MessageComponentInterface {
 	protected $connectionsMap;
+	protected $usernamesMap;
 	protected $db;
 
 	public function __construct() {
-		// A dictionary mapping websocket ids to their connections
+		// A dictionary mapping WebSocket ids to their connections
 		$this->connectionsMap = array();
+		// A dictionary mapping WebSocket ids to their player usernames
+		$this->usernamesMap = array();
+
 		// Database connection
 		$this->db = $GLOBALS['conn'];
 	}
@@ -30,21 +34,21 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 		// Remove player corresponding to closed websocket from queue
 		$this->dequeue($ws_id);
 
-		// Remove client connection from the dictionary
+		// Remove client connection from the dictionaries
 		unset($this->connectionsMap[$ws_id]);
+		unset($this->usernamesMap[$ws_id]);
 	}
 
-	private function enqueue($username, $ws_id) {
+	private function enqueue($ws_id) {
+		// Keeping track of username
+		$this->usernamesMap[$ws_id] = $username;
+
 		$sql = "INSERT INTO match_queue (username, websocket_id) VALUES ('$username', '$ws_id')";
 		$this->db->query($sql);
 	}
 
 	private function dequeue($ws_id) {
 		$sql = "DELETE FROM match_queue WHERE websocket_id = '$ws_id'";
-		$this->db->query($sql);
-	}
-	private function dequeueUser($username) {
-		$sql = "DELETE FROM match_queue WHERE username = '$username'";
 		$this->db->query($sql);
 	}
 
