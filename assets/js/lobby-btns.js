@@ -1,7 +1,8 @@
-const playBtn = document.querySelector("#playBtn");
-const cancelBtn = document.querySelector("#cancelBtn");
-const waitingRoom = document.querySelector("#waiting-room");
-const profileBtn = document.getElementById("profile-btn");
+const playBtn = $("#play-btn");
+const cancelBtn = $("#cancel-btn");
+const waitingRoom = $("#waiting-room");
+
+const profileBtn = $("#profile-btn");
 
 usernamePromise.then((username) => {
 	profileBtn.innerHTML = username;
@@ -10,16 +11,16 @@ usernamePromise.then((username) => {
 var pressedPlay = false;
 
 function showWaitingRoom(){
-	waitingRoom.classList.replace("invisible", "visible");
-	cancelBtn.classList.replace("d-none", "d-inline");
-	playBtn.classList.replace("d-inline", "d-none");
+	waitingRoom.removeClass("invisible").addClass("visible");
+	cancelBtn.removeClass("d-none").addClass("d-inline");
+	playBtn.removeClass("d-inline").addClass("d-none");
 	pressedPlay = true;
 }
 
 function hideWaitingRoom(){
-	waitingRoom.classList.replace("visible", "invisible");
-	cancelBtn.classList.replace("d-inline", "d-none");
-	playBtn.classList.replace("d-none", "d-inline");
+	waitingRoom.removeClass("visible").addClass("invisible");
+	cancelBtn.removeClass("d-inline").addClass("d-none");
+	playBtn.removeClass("d-none").addClass("d-inline");
 	pressedPlay = false;
 }
 

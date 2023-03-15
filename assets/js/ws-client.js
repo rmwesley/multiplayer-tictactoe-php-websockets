@@ -1,3 +1,5 @@
+const inactivityModal = $('#inactive-modal');
+
 function clientWebSocketInit() {
 	window.ws = new WebSocket("ws://localhost:8080");
 
@@ -12,7 +14,12 @@ function clientWebSocketInit() {
 		console.log("WebSocket error.");
 	};
 	window.ws.onmessage = (event) => {
-		message = event.data;
-		if(message.type = 'inactive') showInactivityPopup();
+		message = JSON.parse(event.data);
+		// User was inactive and was removed from match queue
+		if(message.type === 'inactive') {
+			// Showing inactivity popup message
+			inactivityModal.modal('show');
+			hideWaitingRoom();
+		}
 	}
 }
