@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		exit;
 	}
 	$row = mysqli_fetch_assoc($result);
-	if (!password_verify($password, $row['password'])) {
+	if (!password_verify($password, $row['hash'])) {
 		$_SESSION['error'] = "Password is incorrect.";
 		header("Location: ../index.php");
 		exit;

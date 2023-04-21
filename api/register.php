@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	// Hash password before saving
 	$hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-	$sql = "INSERT INTO users (username, password) VALUES ('$username', '$hashedPassword')";
+	$sql = "INSERT INTO users (username, hash) VALUES ('$username', '$hashedPassword')";
 	if (!mysqli_query($conn, $sql)) {
 		$_SESSION['error'] = "Error: " . $sql . "<br>" . mysqli_error($conn);
         header("Location: ../index.php");
