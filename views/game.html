@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="assets/css/boardstyle.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script type="text/javascript" src="assets/js/game.js"></script>
+    <script type="text/javascript" src="assets/js/fetch-username.js"></script>
+  </head>
+  <body>
+    <div class="d-flex justify-content-end">
+      <button id="profile-btn" class="btn btn-primary mr-2" onclick="showProfileInfo()">
+        {{username}}
+      </button>
+    </div>
+    <div class="container mt-4 mb-4">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div>
+            <h4 class="text-center">Room {{roomId}}</h4>
+          </div>
+          <div id="message-box" class="alert alert-primary text-center" role="alert">
+            Waiting for server...
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="board" class="container align-items-center justify-content-center">
+      <div class="row justify-content-center">
+        <button id="0" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="1" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="2" class="tile btn btn-primary btn-sq">&nbsp;</button>
+      </div>
+      <div class="row justify-content-center">
+        <button id="3" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="4" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="5" class="tile btn btn-primary btn-sq">&nbsp;</button>
+      </div>
+      <div class="row justify-content-center">
+        <button id="6" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="7" class="tile btn btn-primary btn-sq">&nbsp;</button>
+        <button id="8" class="tile btn btn-primary btn-sq">&nbsp;</button>
+      </div>
+    </div>
+    <div class="text-center">
+      <div id="win-message-box" class="d-none alert alert-success" role="alert">
+        You win!
+      </div>
+      <div id="tie-message-box" class="d-none alert alert-warning" role="alert">
+        It's a tie!
+      </div>
+      <div id="lose-message-box" class="d-none alert alert-danger" role="alert">
+        You lost
+      </div>
+    </div>
+  </body>
+</html>

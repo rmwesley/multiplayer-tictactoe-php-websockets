@@ -1,4 +1,26 @@
 .btn-sq{
-	width:40px;
-	height:40px;
+	height:100px;
+	width:100px;
+}
+.btn-sq:before{
+	content:" ";
+	position: abolute;
+	display: block;
+}
+/* For X marking */
+.btn-sq.X:before {
+	content: "\2715";
+	font-size: 5em;
+	position: relative;
+	color:#000000;
+	transform: translate(0,-14px);
+}
+
+/* For O marking */
+.btn-sq.O:before {
+	content: "O";
+	font-size: 5em;
+	position: relative;
+	color:#000000;
+	transform: translate(0,-14px);
 }

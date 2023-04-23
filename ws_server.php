@@ -1,5 +1,41 @@
 <?php
 
+function getWinner($board, $turn){
+	if($turn < 3) return;
+	$winner = checkVerticals($board);
+	$winner = checkHorizontals($board) ?? $winner;
+	$winner = checkDiagonals($board) ?? $winner;
+	return $winner;
+}
+function checkHorizontals($board){
+	for ($i=0; $i<3; $i++) {
+		$winner = $board[3*$i];
+		if($winner == "_") continue;
+		if($board[3*$i+1] == $winner && $board[3*$i+2] == $winner){
+			return $winner;
+		}
+	}
+}
+function checkVerticals($board){
+	for ($j=0; $j<3; $j++) {
+		$winner = $board[$j];
+		if($winner == "_") continue;
+		if($board[$j+3] == $winner && $board[$j+6] == $winner){
+			return $winner;
+		}
+	}
+}
+function checkDiagonals($board){
+	$winner = $board[4];
+	if($winner == "_") return;
+	if($board[0] == $winner && $board[8] == $winner) return $winner;
+	if($board[2] == $winner && $board[6] == $winner) return $winner;
+}
+
+function checkMove($move, $boardMarkings){
+	return $boardMarkings[$move] == "_";
+}
+
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
@@ -150,7 +186,7 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 		$newRoom->mark2 = "X";
 		if($newRoom->mark1 == "X") $newRoom->mark2 = "O";
 
-		// Adding new room to rooms list
+		// Adding new toom to rooms list
 		$this->rooms[$room_id] = $newRoom;
 
 		// Send a match found message to the players
@@ -221,6 +257,117 @@ class TicTacToe implements Ratchet\MessageComponentInterface {
 			$from->send($response);
 			$opponent->send($response);
 			break;
+		case 'get_room_data':
+			$room_id = $payload['room_id'];
+			$username = $payload['username'];
+
+			$from->roomId = $room_id;
+			$from->username = $username;
+
+			$room = $this->rooms[$room_id] ?? null;
+			if($room==null){
+				$from->send(
+					json_encode("Access denied!")
+				);
+				//$sql = "SELECT * FROM rooms WHERE id='$room_id'";
+				//$result = $this->db->query($sql);
+				//$message->type = "room_data";
+
+				break;
+			}
+			if ($username == $room->username1) $room->player1 = $from;
+			else $room->player2 = $from;
+
+			$participating = true;
+			if($username !== $room->username1
+				&& $username !== $room->username2){
+				$participating = false;
+				if($username != "alice"){
+
+					$from->send(
+						json_encode("Access denied! You aren't in this room.")
+					);
+					break;
+				}
+			}
+			$message = clone $room;
+			$message->type = "room_data";
+			$from->send(json_encode($message));
+			break;
+
+		case "move":
+			$room_id = $from->roomId;
+			$room = $this->rooms[$room_id];
+			$move = $payload["tile"];
+
+			//echo $room->boardMarkings;
+			//echo "\n";
+
+			if(!checkMove($move, $room->boardMarkings)){
+				$from->send(json_encode(array(
+					"type" => "invalid_move",
+					"move" => $move,
+				)));
+				break;
+			}
+			$curr_player = array(
+				$room->player1,
+				$room->player2)[($room->turn+1)%2];
+			if($curr_player != $from) {
+				$from->send(json_encode(array(
+					"type" => "opponent_turn",
+					"move" => $move,
+				)));
+				break;
+			}
+
+			if ($room->turn%2) $mark = $room->mark1;
+			else $mark = $room->mark2;
+
+			//// Flip the turn, 0 to 1, 1 to 0 with XOR
+			//$room->turn = $room->turn ^ 1;
+			$room->turn++;
+			$room->boardMarkings[$move] = $mark;
+			$winner = getWinner($room->boardMarkings, $room->turn);
+
+			if($winner != "_" && $winner != null){
+				$message = array(
+					'type' => 'game_end',
+					'lastMove' => $move,
+					'moveSymbol' => $winner,
+					'turn' => $room->turn,
+					'boardMarkings' => $room->boardMarkings,
+					'winner' => $curr_player->username,
+				);
+				$sql = "UPDATE rooms SET winner = '$curr_player->username', board_markings = '$room->boardMarkings' WHERE id = '$room_id'";
+				$this->db->query($sql);
+				$room->player1->send(json_encode($message));
+				$room->player2->send(json_encode($message));
+				break;
+			}
+			$sql = "UPDATE rooms SET board_markings = '$room->boardMarkings' WHERE id = '$room_id'";
+			$this->db->query($sql);
+
+			if($room->turn == 10){
+				$message = array(
+					'type' => 'game_end',
+					'lastMove' => $move,
+					'moveSymbol' => $mark,
+					'boardMarkings' => $room->boardMarkings,
+				);
+				$room->player1->send(json_encode($message));
+				$room->player2->send(json_encode($message));
+				break;
+			}
+			$message = array(
+				'type' => 'room_update',
+				'lastMove' => $move,
+				'moveSymbol' => $mark,
+				'turn' => $room->turn,
+				'boardMarkings' => $room->boardMarkings,
+			);
+			$room->player1->send(json_encode($message));
+			$room->player2->send(json_encode($message));
 		}
 	}
 
