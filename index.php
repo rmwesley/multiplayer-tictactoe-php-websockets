@@ -39,4 +39,4 @@ if(isset($_SESSION['username'])){
 	echo $html;
 	exit;
 }
-readfile("views/index.html");
+readfile("views/home.html");

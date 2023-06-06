@@ -15,10 +15,10 @@
 			<div class="dropdown-menu dropdown-menu-end px-3">
               <form action="api/login.php" method="post">
                 <div class="form-group mb-3">
-                  <input type="text" placeholder="Enter Username" class="form-control">
+                  <input name="username" type="text" placeholder="Enter Username" class="form-control">
                 </div>
                 <div class="form-group mb-3">
-                  <input type="password" placeholder="Password" class="form-control">
+                  <input name="password" type="password" placeholder="Password" class="form-control">
                 </div>
 				<div class="d-flex justify-content-center">
                   <input type="submit" value="Login" class="btn btn-primary">
@@ -31,13 +31,13 @@
 			<div class="dropdown-menu dropdown-menu-end px-4 w-200">
               <form action="api/register.php" onsubmit="return validateForm()" method="post">
                 <div class="form-group mb-2">
-                  <input type="text" placeholder="Username" class="form-control">
+                  <input name="username" type="text" placeholder="Username" class="form-control">
                 </div>
                 <div class="form-group mb-2">
-                  <input type="password" placeholder="Password" class="form-control">
+                  <input name="password" type="password" placeholder="Password" class="form-control">
                 </div>
                 <div class="form-group mb-2">
-                  <input type="password" placeholder="Confirm Password" class="form-control">
+                  <input name="confirmation" type="password" placeholder="Confirm Password" class="form-control">
                 </div>
 				<div class="d-flex justify-content-center">
                   <input type="submit" value="Register" class="btn btn-primary">
