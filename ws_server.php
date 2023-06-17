@@ -28,8 +28,6 @@ class Room {
 		$this->xPlayerNumber = rand(1,2);
 
 		$this->linkPlayers();
-		// Setting up symbol for player1 player randomly
-		//$this->firstSymbol = array("X", "O")[rand(0, 1)];
 	}
 
 	function getPlayer1(){
@@ -84,17 +82,11 @@ class Room {
 		return 'O';
 	}
 	function nextMove($move){
-		//// Flip the turn, 0 to 1, 1 to 0 with XOR
-		//$room->turn = $room->turn ^ 1;
 		$this->turn++;
 		$this->board[$move] = $this->getCurrentSymbol();
 	}
 
 	function getWinner(){
-		//if($turn < 3) return;
-		//$winner = checkVerticals($board);
-		//$winner = checkHorizontals($board) ?? $winner;
-		//$winner = checkDiagonals($board) ?? $winner;
 		if($this->getTurn() < 3) return;
 		$winner = $this->checkVerticals();
 		$winner = $this->checkHorizontals() ?? $winner;
@@ -351,9 +343,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 				$from->send(
 					json_encode("Access denied!")
 				);
-				//$sql = "SELECT * FROM rooms WHERE id='$room_id'";
-				//$result = $this->db->query($sql);
-				//$message->type = "room_data";
 
 				break;
 			}
@@ -406,8 +395,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			if ($room->turn%2) $mark = $room->mark1;
 			else $mark = $room->mark2;
 
-			//// Flip the turn, 0 to 1, 1 to 0 with XOR
-			//$room->turn = $room->turn ^ 1;
 			$room->turn++;
 			$room->boardMarkings[$move] = $mark;
 			$winner = getWinner($room->boardMarkings, $room->turn);
@@ -495,15 +482,9 @@ $ws_handler = new \Ratchet\Http\HttpServer(
 
 $loop = \React\EventLoop\Loop::get();
 
-//$secure_websockets = new \React\Socket\SocketServer('0.0.0.0:8080', $context=array(), $loop);
-//$secure_websockets = new \React\Socket\SocketServer('192.168.0.110:8080', $context=array(), $loop);
 $secure_websockets = new \React\Socket\SocketServer('127.0.0.1:8080', $context=array(), $loop);
 $secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
-    //'local_cert' => '/etc/ssl/certs/tictactoe_wss_cert.pem',
     'local_cert' => 'public.pem',
-    //'local_cert' => 'server.p12',
-    //'local_pk' => '/etc/ssl/private/tictactoe_wss_key.pem',
-    //'local_pk' => '/etc/apache2/ssl/private/tictactoe_wss_key.pem',
 	'local_pk' => 'private.pem',
 	'allow_self_signed' => TRUE,
     'verify_peer' => FALSE
@@ -512,18 +493,3 @@ $secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
 $secure_websockets_server =
 	new \Ratchet\Server\IoServer($ws_handler, $secure_websockets, $loop);
 $secure_websockets_server->run();
-
-/*
-$ws_handler = new WsHandler();
-$loop = Factory::create();
-$server = IoServer::factory(
-	new HttpServer(
-		new WsServer(
-			$ws_handler
-		)
-	),
-	8080
-);
-
-$server->run();
- */
