@@ -1,11 +1,11 @@
-const loginBtn = document.querySelector('#loginForm');
-const registerBtn = document.querySelector('#registerForm');
+const loginForm = document.querySelector('#loginForm');
+const registerForm = document.querySelector('#registerForm');
 
 function showLoginForm() {
-	loginBtn.classList.remove('d-none');
-	registerBtn.classList.add('d-none');
+	loginForm.classList.remove('d-none');
+	registerForm.classList.add('d-none');
 }
 function showRegisterForm() {
-	registerBtn.classList.remove('d-none');
-	loginBtn.classList.add('d-none');
+	registerForm.classList.remove('d-none');
+	loginForm.classList.add('d-none');
 }
