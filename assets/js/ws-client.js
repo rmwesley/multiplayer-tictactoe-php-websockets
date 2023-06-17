@@ -3,7 +3,14 @@ const joinModal = $('#join-modal');
 var room_id = null;
 
 function clientWebSocketInit() {
-	window.ws = new WebSocket("ws://localhost:8080");
+	//window.ws = new WebSocket("wss://localhost:8080", null, null, null, {
+	//window.ws = new WebSocket("wss://127.0.0.1:8080", null, null, null, {
+		//protocolVersion: 8,
+		//origin: 'https://localhost:8080',
+		//rejectUnauthorized: false
+	//window.ws = new WebSocket("wss://0.0.0.0:8080");
+	//window.ws = new WebSocket("wss://192.168.0.110:8080");
+	window.ws = new WebSocket("wss://127.0.0.1:8080");
 
 	window.ws.onopen = function () {
 		// Send message to server to add user to the matchmaking queue

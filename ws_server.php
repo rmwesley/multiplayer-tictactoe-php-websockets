@@ -487,20 +487,43 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	}
 }
 
-$loop = Factory::create();
-$tictactoe = new TicTacToe();
+$ws_handler = new \Ratchet\Http\HttpServer(
+    new \Ratchet\WebSocket\WsServer(
+        new WsHandler()
+    )
+);
 
+$loop = \React\EventLoop\Loop::get();
+
+//$secure_websockets = new \React\Socket\SocketServer('0.0.0.0:8080', $context=array(), $loop);
+//$secure_websockets = new \React\Socket\SocketServer('192.168.0.110:8080', $context=array(), $loop);
+$secure_websockets = new \React\Socket\SocketServer('127.0.0.1:8080', $context=array(), $loop);
+$secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
+    //'local_cert' => '/etc/ssl/certs/tictactoe_wss_cert.pem',
+    'local_cert' => 'public.pem',
+    //'local_cert' => 'server.p12',
+    //'local_pk' => '/etc/ssl/private/tictactoe_wss_key.pem',
+    //'local_pk' => '/etc/apache2/ssl/private/tictactoe_wss_key.pem',
+	'local_pk' => 'private.pem',
+	'allow_self_signed' => TRUE,
+    'verify_peer' => FALSE
+]);
+
+$secure_websockets_server =
+	new \Ratchet\Server\IoServer($ws_handler, $secure_websockets, $loop);
+$secure_websockets_server->run();
+
+/*
+$ws_handler = new WsHandler();
+$loop = Factory::create();
 $server = IoServer::factory(
 	new HttpServer(
 		new WsServer(
-			$tictactoe
+			$ws_handler
 		)
 	),
 	8080
 );
 
-$server->loop->addPeriodicTimer(3, function () use ($tictactoe) {
-	$tictactoe->queueCleaner();
-});
-
 $server->run();
+ */
