@@ -10,6 +10,9 @@
       <button id="profile-btn" class="btn btn-primary mr-2" onclick="showProfileInfo()">
         {{username}}
       </button>
+      <form action="api/logout.php" method="post">
+        <input name="Logout" type="submit" value="Logout" class="btn btn-primary">
+      </form>
     </div>
     <div class="container text-center">
       <h1>Lobby</h1>

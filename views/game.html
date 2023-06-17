@@ -1,15 +1,19 @@
-<html>
+<html lang="en">
   <head>
     <link rel="stylesheet" href="assets/css/boardstyle.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script type="text/javascript" src="assets/js/game.js"></script>
     <script type="text/javascript" src="assets/js/fetch-username.js"></script>
   </head>
+
   <body>
     <div class="d-flex justify-content-end">
       <button id="profile-btn" class="btn btn-primary mr-2" onclick="showProfileInfo()">
         {{username}}
       </button>
+      <form action="api/logout.php" method="post">
+        <input name="Logout" type="submit" value="Logout" class="btn btn-primary">
+      </form>
     </div>
     <div class="container mt-4 mb-4">
       <div class="row justify-content-center">
