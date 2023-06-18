@@ -4,7 +4,7 @@ session_start();
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	// Opening database connection
-	require_once $_SERVER['DOCUMENT_ROOT'] . '/../config/db.php';
+	require_once '../config/db.php';
 
 	$username = mysqli_real_escape_string($conn, $_POST['username']);
 	$password = mysqli_real_escape_string($conn, $_POST['password']);

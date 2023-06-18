@@ -6,8 +6,8 @@ use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\EventLoop\Factory;
 
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config/db.php';
+require_once '../vendor/autoload.php';
+require_once 'config/db.php';
 
 class Room {
 	private $roomId;
