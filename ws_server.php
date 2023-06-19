@@ -226,17 +226,11 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		$result = $this->db->query($query);
 
 		if (!$result) {
-			// Failed to create the room
-			// Notify the players and put them back in the queue
-			$response = json_encode(array(
-				'type' => 'error',
-				'message' => 'Failed to create game room'
-			));
-			$player1->send($response);
-			$player2->send($response);
-
-			$this->enqueue($player1);
-			$this->enqueue($player2);
+			// Failed to create the game room
+			// Close the player's connections while notifying the error
+			// 1011 (Internal Error)
+			$player1->close(1011, "Database Error: Failed to create game room");
+			$player2->close(1011, "Database Error: Failed to create game room");
 			return;
 		}
 
