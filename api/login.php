@@ -9,6 +9,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
+    // Prepare and execute the query using prepared statements
+    $sql = "SELECT * FROM users WHERE username = ?";
+    $statement = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($statement, 's', $username);
+    mysqli_stmt_execute($statement);
+    $result = mysqli_stmt_get_result($statement);
+
     $sql = "SELECT * FROM users WHERE username = '$username'";
     $result = mysqli_query($conn, $sql);
     if (mysqli_num_rows($result) == 0) {
