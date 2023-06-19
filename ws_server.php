@@ -383,72 +383,70 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			$room = $this->rooms[$room_id];
 			$move = $payload["tile"];
 
-			//echo $room->boardMarkings;
-			//echo "\n";
-
-			if(!checkMove($move, $room->boardMarkings)){
+			if($room->gameOver()){
+				$from->send(json_encode(array(
+					"type" => "game_over",
+				)));
+				return;
+			}
+			if(!$room->checkAvailability($move)){
 				$from->send(json_encode(array(
 					"type" => "invalid_move",
 					"move" => $move,
 				)));
 				break;
 			}
-			$curr_player = array(
-				$room->player1,
-				$room->player2)[($room->turn+1)%2];
+			$curr_player = $room->getCurrentPlayer();
+
 			if($curr_player != $from) {
 				$from->send(json_encode(array(
-					"type" => "opponent_turn",
+					"type" => "not_your_turn",
 					"move" => $move,
 				)));
 				break;
 			}
-
-			if ($room->turn%2) $mark = $room->mark1;
-			else $mark = $room->mark2;
-
-			$room->turn++;
-			$room->boardMarkings[$move] = $mark;
-			$winner = getWinner($room->boardMarkings, $room->turn);
+			$room->nextMove($move);
+			$updated_board = $room->getBoard();
+			$winner = $room->getWinner();
 
 			if($winner != "_" && $winner != null){
 				$message = array(
 					'type' => 'game_end',
 					'lastMove' => $move,
 					'moveSymbol' => $winner,
-					'turn' => $room->turn,
-					'boardMarkings' => $room->boardMarkings,
+					'turn' => $room->getTurn(),
+					'board' => $updated_board,
 					'winner' => $curr_player->username,
 				);
-				$sql = "UPDATE rooms SET winner = '$curr_player->username', board_markings = '$room->boardMarkings' WHERE id = '$room_id'";
+				$sql = "UPDATE rooms SET winner = '$curr_player->username', board_markings = '$updated_board' WHERE id = '$room_id'";
 				$this->db->query($sql);
-				$room->player1->send(json_encode($message));
-				$room->player2->send(json_encode($message));
+				$room->getPlayer1()->send(json_encode($message));
+				$room->getPlayer2()->send(json_encode($message));
 				break;
 			}
-			$sql = "UPDATE rooms SET board_markings = '$room->boardMarkings' WHERE id = '$room_id'";
+			$sql = "UPDATE rooms SET board_markings = '$updated_board' WHERE id = '$room_id'";
 			$this->db->query($sql);
 
-			if($room->turn == 10){
+			if($room->getTurn() == 10){
 				$message = array(
 					'type' => 'game_end',
 					'lastMove' => $move,
-					'moveSymbol' => $mark,
-					'boardMarkings' => $room->boardMarkings,
+					'moveSymbol' => $room->getCurrentSymbol(),
+					'board' => $updated_board,
 				);
-				$room->player1->send(json_encode($message));
-				$room->player2->send(json_encode($message));
+				$room->getPlayer1()->send(json_encode($message));
+				$room->getPlayer2()->send(json_encode($message));
 				break;
 			}
 			$message = array(
 				'type' => 'room_update',
 				'lastMove' => $move,
-				'moveSymbol' => $mark,
-				'turn' => $room->turn,
-				'boardMarkings' => $room->boardMarkings,
+				'moveSymbol' => $room->getCurrentSymbol(),
+				'turn' => $room->getTurn(),
+				'board' => $updated_board,
 			);
-			$room->player1->send(json_encode($message));
-			$room->player2->send(json_encode($message));
+			$room->getPlayer1()->send(json_encode($message));
+			$room->getPlayer2()->send(json_encode($message));
 		}
 	}
 
