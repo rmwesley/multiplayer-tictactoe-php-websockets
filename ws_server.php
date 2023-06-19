@@ -161,7 +161,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	public function onClose(Ratchet\ConnectionInterface $from) {
 		if ($from->state == "joined_room") {
 			$room_id = $from->roomId;
-			$opponent = $this->getOpponent($room_id, $from);
+			$opponent = $this->getOpponent($from);
 			// If opponent already closed, just unset the room
 			if($opponent->state == "closed"){
 				unset($this->rooms[$room_id]);
@@ -286,9 +286,20 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		$player2->send($response);
 	}
 
-	public function getOpponent($room_id, $client){
-		if ($this->rooms[$room_id]->player1 == $client) {
-			return $this->rooms[$room_id]->player2;
+	public function getOpponent(Ratchet\ConnectionInterface $from){
+		// Get the room from its ID stored in the connection object
+		//$player1 = $this->rooms[$from->roomId]->player1;
+		//if ($from == $player1) {
+		//    return $this->rooms[$from->roomId]->player2;
+		//}
+		//return $player1;
+		if(!isset($from->roomId)){
+			echo "Player ".$from->username." is not yet in a room\n";
+			return;
+		}
+		$room = $this->rooms[$from->roomId];
+		if($room->getPlayer1() == $from){
+			return $room->getPlayer2();
 		}
 		return $room->getPlayer1();
 	}
@@ -313,11 +324,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		case 'confirm':
 			$from->state = "confirmed";
 
-			// Get the room ID from the connection object
-			$room_id = $from->roomId;
-
 			// Get opponent connection
-			$opponent = $this->getOpponent($room_id, $from);
+			$opponent = $this->getOpponent($from);
 
 			$response = json_encode(array(
 				'type' => 'opponent_confirmed',
