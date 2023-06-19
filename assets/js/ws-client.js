@@ -55,7 +55,7 @@ function clientWebSocketInit() {
 		}
 		else if(message.type === "game_start"){
 			// Redirect to game room
-			window.location.href = "game.php?room_id=" + room_id;
+			window.location.href = "index.php?room_id=" + room_id;
 		}
 	}
 }

@@ -7,18 +7,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = mysqli_real_escape_string($conn, $_POST['password']);
     $confirmPassword = mysqli_real_escape_string($conn, $_POST['confirmation']);
 
+    // Validate input data
+    if (empty($username) || empty($password)) {
+        $_SESSION['error'] = "Registration failed";
+        header("Location: ../index.php?registerFailed=true&reason=emptyFields");
+        exit;
+    }
+
     // Check if username already exists
     $checkUsernameSql = "SELECT * FROM users WHERE username = '$username'";
     $checkUsernameResult = mysqli_query($conn, $checkUsernameSql);
 
     if (mysqli_num_rows($checkUsernameResult) > 0) {
-        header("location:../index.php?registerFailed=true&reason=usernameAlreadyExists");
+        header("location: ../index.php?registerFailed=true&reason=usernameAlreadyExists");
         exit;
     }
 
     // Check if both passwords match
     if ($password != $confirmPassword) {
-        header("location:../index.php?registerFailed=true&reason=passwordMismatch");
+        header("location: ../index.php?registerFailed=true&reason=passwordMismatch");
         header("Location: ../index.php");
         exit;
     }
