@@ -442,35 +442,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		}
 	}
 
-	public function queueCleaner() {
-		$threshold = time() - 6;
-		$query = "SELECT * FROM match_queue WHERE UNIX_TIMESTAMP(last_heartbeat_ts) < $threshold";
-		$result = $this->db->query($query);
-
-		// Looping entire TABLE
-		while ($row = $result->fetch_assoc()) {
-			// Getting the connection from WebSocket id
-			$ws_id = $row['websocket_id'];
-			$client = $this->connectionsMap[$ws_id] ?? null;
-
-			// Dequeueing client
-			$this->dequeue($ws_id);
-
-			if($client == null){
-				continue;
-			}
-
-			// Sending message to client so they know why they were removed
-			$response = json_encode(array(
-				'type' => 'inactive',
-			));
-			$client->send($response);
-
-			// Closing connection since client is not in queue anymore
-			$client->close();
-		}
-	}
-
 	public function onError(Ratchet\ConnectionInterface $from, Exception $e) {
 		// Handle errors
 	}
