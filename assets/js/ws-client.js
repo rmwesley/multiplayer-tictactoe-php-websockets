@@ -6,15 +6,24 @@ function clientWebSocketInit() {
 	window.ws = new WebSocket("wss://127.0.0.1:8080");
 
 	window.ws.onopen = function () {
-		// Send message to server to add user to the matchmaking queue
+		// Send a message to server to enqueue client websocket
 		usernamePromise.then((username) => {
-			this.send(JSON.stringify({ type: "enqueue", username: username }));
-		});
+			this.send(JSON.stringify({
+				"type": "enqueue",
+				"username": username
+			}));
+		})
 	};
 
-	window.ws.onerror = function () {
-		console.log("WebSocket error.");
+	window.ws.onclose = (event) => {
+		console.log('WebSocket closed with code:', event.code);
+		console.log('Close reason:', event.reason);
+
+		if(event.code == 4001){
+			console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
+		}
 	};
+
 	window.ws.onmessage = (event) => {
 		message = JSON.parse(event.data);
 		console.log(message);
