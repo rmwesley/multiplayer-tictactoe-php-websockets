@@ -19,6 +19,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sql = "SELECT * FROM users WHERE username = '$username'";
 
+    // Validate input data
+    if (empty($username) || empty($password)) {
+        $_SESSION['error'] = "Login failed";
+        header("location: ../index.php?loginFailed=true");
+        exit;
+    }
+
     // Check if username exists
     $result = mysqli_query($conn, $sql);
     if (mysqli_num_rows($result) == 0) {
