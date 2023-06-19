@@ -150,13 +150,27 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	}
 
 	public function onOpen(Ratchet\ConnectionInterface $from) {
-		$from->state = "waiting";
 		// Add new client connection to the dictionary
 		$this->connectionsMap[$from->resourceId] = $from;
+		$from->timestamp = time();
+		$from->state = "opened";
+
+		//if(!isset($from->WebSocket->request)) return;
+		// Fetching username from Apache sessions...
+		//$sessionId = $from->WebSocket->request->getCookies()['PHPSESSID'];
+		//session_id($sessionId);
+		//@session_start();
+
+		// Setting a new username field on the connection
+		//$from->username = $_SESSION['username'];
+		//echo $from->username;
+		//echo "\n";
+		//session_write_close();
+		return;
 	}
 
 	public function onClose(Ratchet\ConnectionInterface $from) {
-		if ($from->state == "joined_game") {
+		if ($from->state == "joined_room") {
 			$room_id = $from->roomId;
 			$opponent = $this->getOpponent($room_id, $from);
 			// If opponent already closed, just unset the room
@@ -165,9 +179,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			}
 			else{
 				$from->state = "closed";
-				$room_id = $from->roomId;
-				$sql = "DELETE FROM rooms WHERE id = '$room_id'";
-				$this->db->query($sql);
 
 				// Notify the player that their opponent has disconnected
 				$response = json_encode(array(
@@ -248,8 +259,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		}
 
 		$room_id = $this->db->insert_id;
-		$player1->state = "joined_game";
-		$player2->state = "joined_game";
+		$player1->state = "joined_room";
+		$player2->state = "joined_room";
 		$player1->roomId = $room_id;
 		$player2->roomId = $room_id;
 
@@ -294,20 +305,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			$this->enqueue($username, $from);
 			break;
 		case 'ping':
-			$ws_id = $from->resourceId;
-			$sql = "SELECT * FROM match_queue WHERE websocket_id = '$ws_id'";
-			$result = $this->db->query($sql);
-			if ($result->num_rows > 0) {
-				$sql = "UPDATE match_queue SET last_heartbeat_ts = NOW() WHERE websocket_id = '$ws_id'";
-				$this->db->query($sql);
-			} else {
-				$response = json_encode(array(
-					'type' => 'inactive',
-				));
-				$from->send($response);
-			}
+			$from->timestamp = time();
 			break;
-
 		case 'confirm':
 			$from->state = "confirmed";
 
