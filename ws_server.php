@@ -155,17 +155,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		$from->timestamp = time();
 		$from->state = "opened";
 
-		//if(!isset($from->WebSocket->request)) return;
-		// Fetching username from Apache sessions...
-		//$sessionId = $from->WebSocket->request->getCookies()['PHPSESSID'];
-		//session_id($sessionId);
-		//@session_start();
-
-		// Setting a new username field on the connection
-		//$from->username = $_SESSION['username'];
-		//echo $from->username;
-		//echo "\n";
-		//session_write_close();
 		return;
 	}
 
@@ -219,6 +208,14 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	private function dequeue($ws_id) {
 		$sql = "DELETE FROM match_queue WHERE websocket_id = '$ws_id'";
 		$this->db->query($sql);
+	public function cleanInactive($client) {
+		if($client == null){
+			return;
+		}
+
+		// Closing connection due to inactivity
+		// 4001 (Inactivity Timeout)
+		$client->close(new Frame(pack('n', "Inactivity Timeout"), true, 4001));
 	}
 
 	public function nextPlayer() {
@@ -227,6 +224,10 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			$client = $this->queue->dequeue();
 			$this->queueCounter--;
 
+			if(time() - $client->timestamp > 10){
+				$this->cleanInactive($client);
+				return;
+			}
 			if($client->state == "closed") continue;
 			return $client;
 		}
@@ -237,6 +238,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		// Get 2 next open connections as players
 		$player1 = $this->nextPlayer();
 		$player2 = $this->nextPlayer();
+
+		// Could not find 2 available players
 		if(!isset($player1) || !isset($player2)) return;
 
 		// Create a new entry in the rooms table
