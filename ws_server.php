@@ -131,7 +131,6 @@ class Room {
 class WsHandler implements Ratchet\MessageComponentInterface {
 	private $queue;
 	private $queueCounter;
-	private $connectionsMap;
 	private $rooms;
 	protected $db;
 
@@ -139,9 +138,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		// A queue to hold WebSocket connections waiting for a match
 		$this->queue = new \SplQueue;
 		$queueCounter = 0;
-
-		// A dictionary mapping WebSocket ids to their connections
-		$this->connectionsMap = array();
 
 		// Currently open game rooms
 		$this->rooms = array();
@@ -151,8 +147,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	}
 
 	public function onOpen(Ratchet\ConnectionInterface $from) {
-		// Add new client connection to the dictionary
-		$this->connectionsMap[$from->resourceId] = $from;
 		$from->timestamp = time();
 		$from->state = "opened";
 
@@ -179,13 +173,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			}
 		}
 		$from->state = "closed";
-
-		$ws_id = $from->resourceId;
-
-		$this->dequeue($from->resourceId);
-
-		// Remove client connection from the dictionaries
-		unset($this->connectionsMap[$ws_id]);
 	}
 
 	private function enqueue($from) {
