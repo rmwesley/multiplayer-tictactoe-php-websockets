@@ -5,6 +5,7 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\EventLoop\Factory;
+use Ratchet\RFC6455\Messaging\Frame;
 
 require_once '../vendor/autoload.php';
 require_once 'config/db.php';
@@ -307,6 +308,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	public function isAdmin($from){
 		if($from->username == "alice") return true;
 	}
+
 	public function onMessage(Ratchet\ConnectionInterface $from, $msg) {
 		//print_r($msg);
 		//echo "\n";
@@ -350,30 +352,30 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 			$room = $this->rooms[$room_id] ?? null;
 			if($room==null){
+				// Forbidden room for current user
+				// 4002 (Forbidden Room)
+				$from->close(new Frame(pack('n', "Forbidden Room"), true, 4002));
+				return;
+			}
+			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
 				$from->send(
-					json_encode("Access denied!")
+					json_encode("Access denied! You aren't in this room.")
 				);
-
 				break;
 			}
-			if ($username == $room->username1) $room->player1 = $from;
-			else $room->player2 = $from;
-
-			$participating = true;
-			if($username !== $room->username1
-				&& $username !== $room->username2){
-				$participating = false;
-				if($username != "alice"){
-
-					$from->send(
-						json_encode("Access denied! You aren't in this room.")
-					);
-					break;
-				}
+			if($room->isInRoom($from)){
+				$room->updatePlayerConnection($from);
 			}
-			$message = clone $room;
-			$message->type = "room_data";
-			$from->send(json_encode($message));
+
+			$response = array(
+				"username1" => $room->getPlayer1()->username,
+				"username2" => $room->getPlayer2()->username,
+				"boardMarkings" => $room->getBoard(),
+				"turn" => $room->getTurn(),
+				"xPlayerNumber" => $room->getXPlayerNumber(),
+				"type" => "room_data",
+			);
+			$from->send(json_encode($response));
 			break;
 
 		case "move":
