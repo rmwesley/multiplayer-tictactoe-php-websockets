@@ -12,13 +12,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $checkUsernameResult = mysqli_query($conn, $checkUsernameSql);
 
     if (mysqli_num_rows($checkUsernameResult) > 0) {
-        header("location:../index.php?registerFailed=true&reason=usernameAlreadyExists");
+        header("location: ../index.php?registerFailed=true&reason=usernameAlreadyExists");
         exit;
     }
 
     // Check if both passwords match
     if ($password != $confirmPassword) {
-        header("location:../index.php?registerFailed=true&reason=passwordMismatch");
+        header("location: ../index.php?registerFailed=true&reason=passwordMismatch");
         header("Location: ../index.php");
         exit;
     }

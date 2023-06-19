@@ -1,11 +1,12 @@
 <?php
 session_start();
 
-// Check if form is submitted
+// Check if a form was submitted and handle it
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Opening database connection
     require_once '../config/db.php';
 
+    // Sanitize input data
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
@@ -17,22 +18,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = mysqli_stmt_get_result($statement);
 
     $sql = "SELECT * FROM users WHERE username = '$username'";
+
+    // Check if username exists
     $result = mysqli_query($conn, $sql);
     if (mysqli_num_rows($result) == 0) {
-        header("location:../index.php?loginFailed=true&reason=username");
+        $_SESSION['error'] = "Login failed";
+        header("location: ../index.php?loginFailed=true");
         exit;
     }
-    $row = mysqli_fetch_assoc($result);
-    if (!password_verify($password, $row['hash'])) {
-        $_SESSION['error'] = "Password is incorrect.";
-        header("location:../index.php?loginFailed=true&reason=password");
-        exit;
-    }
-    $_SESSION['username'] = $username;
-    header("Location: ../index.php?loginSuccess=true");
 
+    // Fetch the user data
+    $row = mysqli_fetch_assoc($result);
+
+    // Verify the password
+    if (!password_verify($password, $row['hash'])) {
+        $_SESSION['error'] = "Login failed";
+        header("location: ../index.php?loginFailed=true");
+        exit;
+    }
+
+    // Store the username in session
+    $_SESSION['username'] = $username;
+
+    // Close prepared statement
+    mysqli_stmt_close($statement);
     // Closing database connection
     mysqli_close($conn);
+
+    header("Location: ../index.php?loginSuccess=true");
 }
 
 ?>
