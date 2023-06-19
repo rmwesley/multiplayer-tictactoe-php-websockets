@@ -12,6 +12,16 @@ usernamePromise.then((username) => {
 
 var pressedPlay = false;
 
+// Enter is equivalent to click on Play/Confirm
+$(document).keyup((event) => {
+    if (event.keyCode == 13) {
+		if(pressedPlay){
+			confirmBtn.children().first().click();
+		}
+		else playBtn.children().first().click();
+    }
+});
+
 function showWaitingRoom(){
 	waitingRoom.removeClass("invisible").addClass("visible");
 	cancelBtn.removeClass("d-none").addClass("d-inline");

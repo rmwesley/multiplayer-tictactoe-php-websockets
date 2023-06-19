@@ -9,7 +9,7 @@ window.onload = () => {
 	const board = document.getElementById("board");
 	board.addEventListener("click", mark)
 }
-window.socket = new WebSocket("ws://localhost:8080");
+window.socket = new WebSocket("wss://localhost:8080");
 window.socket.onopen = function () {
 	// Send message to recover match data
 	usernamePromise.then((username) => {
