@@ -188,17 +188,11 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		unset($this->connectionsMap[$ws_id]);
 	}
 
-	private function enqueue($username, $from) {
+	private function enqueue($from) {
 		// Add client connection to the queue
 		$this->queue->enqueue($from);
 		$this->queueCounter++;
-
-		$ws_id = $from->resourceId;
-		// Keeping track of username
-		$from->username = $username;
-
-		$sql = "INSERT INTO match_queue (username, websocket_id) VALUES ('$username', '$ws_id')";
-		$this->db->query($sql);
+		$from->state = "waiting";
 
 		// Call matchup if there are at least 2 players in the queue
 		if ($this->queueCounter >= 2) {
@@ -206,9 +200,6 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		}
 	}
 
-	private function dequeue($ws_id) {
-		$sql = "DELETE FROM match_queue WHERE websocket_id = '$ws_id'";
-		$this->db->query($sql);
 	public function cleanInactive($client) {
 		if($client == null){
 			return;
@@ -317,8 +308,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 		switch($type) {
 		case 'enqueue':
-			$username = $payload['username'];
-			$this->enqueue($username, $from);
+			$from->username = $payload['username'];
+			$this->enqueue($from);
 			break;
 		case 'ping':
 			$from->timestamp = time();
