@@ -260,24 +260,12 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		$player2->state = "joined_game";
 		$player1->roomId = $room_id;
 		$player2->roomId = $room_id;
-		$username1 = $player1->username;
-		$username2 = $player2->username;
 
-		// Setting up new room...
-		$newRoom = new stdClass();
-		$newRoom->roomId = $room_id;
-		$newRoom->turn = 1;
-		$newRoom->player1 = $player1;
-		$newRoom->player2 = $player2;
-		$newRoom->username1 = $username1;
-		$newRoom->username2 = $username2;
-		$newRoom->boardMarkings = "_________";
-		$newRoom->mark1 = array("X", "O")[array_rand(array("X", "O"))];
-		$newRoom->mark2 = "X";
-		if($newRoom->mark1 == "X") $newRoom->mark2 = "O";
+		// Setting up new game room...
+		$room = new Room($player1, $player2, $room_id);
 
-		// Adding new toom to rooms list
-		$this->rooms[$room_id] = $newRoom;
+		// Adding new room to rooms array
+		$this->rooms[$room_id] = $room;
 
 		// Send a match found message to the players
 		// This will ask them for confirmation to join a game room
@@ -296,7 +284,11 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		if ($this->rooms[$room_id]->player1 == $client) {
 			return $this->rooms[$room_id]->player2;
 		}
-		return $this->rooms[$room_id]->player1;
+		return $room->getPlayer1();
+	}
+
+	public function isAdmin($from){
+		if($from->username == "alice") return true;
 	}
 	public function onMessage(Ratchet\ConnectionInterface $from, $msg) {
 		//print_r($msg);
