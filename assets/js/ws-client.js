@@ -22,6 +22,7 @@ function clientWebSocketInit() {
 		if(event.code == 4001){
 			console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
 		}
+		setTimeout(300, hideWaitingRoom);
 	};
 
 	window.ws.onmessage = (event) => {
