@@ -7,17 +7,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     require_once '../config/db.php';
 
     // Sanitize input data
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-
-    // Prepare and execute the query using prepared statements
-    $sql = "SELECT * FROM users WHERE username = ?";
-    $statement = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($statement, 's', $username);
-    mysqli_stmt_execute($statement);
-    $result = mysqli_stmt_get_result($statement);
-
-    $sql = "SELECT * FROM users WHERE username = '$username'";
+    $username = $conn->real_escape_string($_POST['username']);
+    $password = $conn->real_escape_string($_POST['password']);
 
     // Validate input data
     if (empty($username) || empty($password)) {
@@ -26,8 +17,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
+    // Prepare and execute the query using prepared statements
+    $sql = "SELECT * FROM users WHERE username = ?";
+    $statement = $conn->prepare($sql);
+
+    // Bind username, a string paramater
+    $statement->bind_param('s', $username);
+    $statement->execute();
+
     // Check if username exists
-    $result = mysqli_query($conn, $sql);
+    $result = $statement->get_result();
     if (mysqli_num_rows($result) == 0) {
         $_SESSION['error'] = "Login failed";
         header("location: ../index.php?loginFailed=true");
@@ -35,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Fetch the user data
-    $row = mysqli_fetch_assoc($result);
+    $row = $result->fetch_assoc();
 
     // Verify the password
     if (!password_verify($password, $row['hash'])) {
@@ -48,9 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['username'] = $username;
 
     // Close prepared statement
-    mysqli_stmt_close($statement);
+    $statement->close();
     // Closing database connection
-    mysqli_close($conn);
+    $conn->close();
 
     header("Location: ../index.php?page=lobby");
 }
