@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Closing database connection
     mysqli_close($conn);
 
-    header("Location: ../index.php?loginSuccess=true");
+    header("Location: ../index.php?page=lobby");
 }
 
 ?>
