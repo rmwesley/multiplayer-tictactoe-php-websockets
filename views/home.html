@@ -7,42 +7,44 @@
   </head>
   <body>
     <div class="navbar navbar-dark bg-dark navbar-expand">
-      <div class="collapse navbar-collapse">
-    <a class="navbar-brand" href="index.php">TicTacToe</a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">Login</button>
-			<div class="dropdown-menu dropdown-menu-end px-3">
-              <form action="api/login.php" method="post">
-                <div class="form-group mb-3">
-                  <input name="username" type="text" placeholder="Enter Username" class="form-control">
-                </div>
-                <div class="form-group mb-3">
-                  <input name="password" type="password" placeholder="Password" class="form-control">
-                </div>
-				<div class="d-flex justify-content-center">
-                  <input type="submit" value="Login" class="btn btn-primary">
-				</div>
-              </form>
+      <div class="container-fluid">
+        <div class="collapse navbar-collapse">
+          <a class="navbar-brand" href="index.php">TicTacToe</a>
+          <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+              <button class="btn btn-dark me-4" data-bs-toggle="dropdown">Login</button>
+              <div class="dropdown-menu dropdown-menu-end px-3">
+                <form action="api/login.php" method="post">
+                  <div class="form-group mb-3">
+                    <input name="username" type="text" placeholder="Enter Username" class="form-control">
+                  </div>
+                  <div class="form-group mb-3">
+                    <input name="password" type="password" placeholder="Password" class="form-control">
+                  </div>
+                  <div class="d-flex justify-content-center">
+                    <input type="submit" value="Login" class="btn btn-primary">
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-          <div class="nav-item dropdown">
-            <button class="nav-link text-white" data-bs-toggle="dropdown">Register</button>
-			<div class="dropdown-menu dropdown-menu-end px-4 w-200">
-              <form action="api/register.php" onsubmit="return validateForm()" method="post">
-                <div class="form-group mb-2">
-                  <input name="username" type="text" placeholder="Username" class="form-control">
-                </div>
-                <div class="form-group mb-2">
-                  <input name="password" type="password" placeholder="Password" class="form-control">
-                </div>
-                <div class="form-group mb-2">
-                  <input name="confirmation" type="password" placeholder="Confirm Password" class="form-control">
-                </div>
-				<div class="d-flex justify-content-center">
-                  <input type="submit" value="Register" class="btn btn-primary">
-				</div>
-              </form>
+            <div class="nav-item dropdown">
+              <button class="btn btn-outline-success" data-bs-toggle="dropdown">Register</button>
+              <div class="dropdown-menu dropdown-menu-end px-4 w-200">
+                <form action="api/register.php" onsubmit="return validateForm()" method="post">
+                  <div class="form-group mb-2">
+                    <input name="username" type="text" placeholder="Username" class="form-control">
+                  </div>
+                  <div class="form-group mb-2">
+                    <input name="password" type="password" placeholder="Password" class="form-control">
+                  </div>
+                  <div class="form-group mb-2">
+                    <input name="confirmation" type="password" placeholder="Confirm Password" class="form-control">
+                  </div>
+                  <div class="d-flex justify-content-center">
+                    <input type="submit" value="Register">
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
