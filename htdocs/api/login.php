@@ -4,7 +4,7 @@ session_start();
 // Check if a form was submitted and handle it
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Opening database connection
-    require_once '../config/db.php';
+    require_once '../../config/db.php';
 
     // Sanitize input data
     $username = $conn->real_escape_string($_POST['username']);

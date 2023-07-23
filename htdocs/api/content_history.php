@@ -1,7 +1,7 @@
 <?php
-@session_start();
+session_start();
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../../config/db.php';
 
 function generate_match_row($match_data){
 	$match_div = "<th scope='row'>{$match_data['id']}</th>";
