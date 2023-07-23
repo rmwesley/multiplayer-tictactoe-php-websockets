@@ -32,7 +32,7 @@ function clientWebSocketInit() {
 		if(message.type === 'match_found') {
 			joinModal.find('#player1').text(message.player1);
 			joinModal.find('#player2').text(message.player2);
-			joinModal.find('.modal-title').append(message.room_id);
+			joinModal.find('.modal-title').text("Join Room " + message.room_id);
 			room_id = message.room_id;
 
 			joinModal.modal('show');
