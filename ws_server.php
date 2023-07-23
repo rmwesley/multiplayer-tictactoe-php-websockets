@@ -39,6 +39,9 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	public function onClose(Ratchet\ConnectionInterface $from) {
 		if ($from->state == "joined_room") {
 			$room_id = $from->roomId;
+			$query = "DELETE FROM rooms WHERE id='$room_id'";
+			$this->db->query($query);
+
 			$opponent = $this->getOpponent($from);
 			// If opponent already closed, just unset the room
 			if($opponent->state == "closed"){
@@ -103,6 +106,9 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 		// Could not find 2 available players
 		if(!isset($player1) || !isset($player2)) return;
+
+		// Same player in different sessions
+		if($player1->username == $player2->username) return;
 
 		// Create a new entry in the rooms table
 		$query = "INSERT INTO rooms (player1, player2) VALUES ('$player1->username', '$player2->username')";
@@ -206,7 +212,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			$from->username = $username;
 
 			$room = $this->rooms[$room_id] ?? null;
-			if($room==null){
+			if(empty($room)){
 				// Forbidden room for current user
 				// 4002 (Forbidden Room)
 				$from->close(new Frame(pack('n', "Forbidden Room"), true, 4002));
