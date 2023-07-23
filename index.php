@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+include_once "api/content_navbar.php";
+
 // Check if user is not yet logged in
 if (empty($_SESSION['username'])) {
 	// Display the registration/login form
@@ -10,32 +12,35 @@ if (empty($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Check if user is not yet in a room
-if(empty($_GET['room_id'])){
-	$html = file_get_contents("views/lobby.html");
-	$html = str_replace("{{username}}", $username, $html);
-	echo $html;
-	exit;
-}
+// Get navbar and insert username
+$navbar = str_replace("{{username}}", $username, $navbar);
 
-$room_id = $_GET['room_id'];
 
-// Setup/choose room css style
-$style = "default";
-if(isset($_GET['room_style'])){
-	$style = $_GET['room_style'];
-}
+switch($_GET['page']){
+case 'game':
+	$room_id = $_GET['room_id'];
 
-if($style == "custom"){
-	$html = file_get_contents("views/custom-room.html");
+	// Setup/choose room css style
+	$style = "default";
+	if(isset($_GET['room_style'])){
+		$style = $_GET['room_style'];
+	}
+
+	if($style == "custom"){
+		$html = file_get_contents("views/custom-room.html");
+		$html = str_replace("{{username}}", $username, $html);
+		$html = str_replace("{{roomId}}", $room_id, $html);
+		break;
+	}
+
+	$html = file_get_contents("views/default-room.html");
 	$html = str_replace("{{username}}", $username, $html);
 	$html = str_replace("{{roomId}}", $room_id, $html);
-	echo $html;
-	exit;
+	break;
+default:
+	$html = file_get_contents("views/lobby.html");
+	break;
 }
-
-$html = file_get_contents("views/default-room.html");
-$html = str_replace("{{username}}", $username, $html);
-$html = str_replace("{{roomId}}", $room_id, $html);
+$html = str_replace("<body>", "<body>".$navbar, $html);
 echo $html;
 ?>
