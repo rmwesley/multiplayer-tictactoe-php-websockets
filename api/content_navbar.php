@@ -14,6 +14,9 @@ $navbar = <<< HERE
         <li class='nav-item'>
           <a class='nav-link' href='?page=game'>Game Room</a>
         </li>
+        <li class='nav-item'>
+          <a class='nav-link' href='?page=history'>Match history</a>
+        </li>
       </ul>
     </div>
 

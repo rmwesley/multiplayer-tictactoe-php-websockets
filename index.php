@@ -37,6 +37,13 @@ case 'game':
 	$html = str_replace("{{username}}", $username, $html);
 	$html = str_replace("{{roomId}}", $room_id, $html);
 	break;
+case 'history':
+	$html = file_get_contents("views/history.html");
+
+	// Obtain match history
+	include_once "api/content_history.php";
+	$html = str_replace("{{game_history}}", $match_history_table, $html);
+	break;
 default:
 	$html = file_get_contents("views/lobby.html");
 	break;
