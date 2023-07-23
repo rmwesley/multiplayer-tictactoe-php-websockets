@@ -16,26 +16,20 @@ function clientWebSocketInit() {
 	};
 
 	window.ws.onclose = (event) => {
-		console.log('WebSocket closed with code:', event.code);
-		console.log('Close reason:', event.reason);
-
+		// User was inactive and was removed from match queue
 		if(event.code == 4001){
-			console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
+			// Showing inactivity popup message
+			inactivityModal.modal('show');
+			hideWaitingRoom();
+			//console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
 		}
 		setTimeout(300, hideWaitingRoom);
 	};
 
 	window.ws.onmessage = (event) => {
 		message = JSON.parse(event.data);
-		console.log(message);
-		// User was inactive and was removed from match queue
-		if(message.type === 'inactive') {
-			// Showing inactivity popup message
-			inactivityModal.modal('show');
-			hideWaitingRoom();
-		}
 		// Match found
-		else if(message.type === 'match_found') {
+		if(message.type === 'match_found') {
 			joinModal.find('#player1').text(message.player1);
 			joinModal.find('#player2').text(message.player2);
 			joinModal.find('.modal-title').append(message.room_id);
