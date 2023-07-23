@@ -17,8 +17,13 @@
           <div>
             <h4 class="text-center">Room {{roomId}}</h4>
           </div>
-          <div id="message-box" class="alert alert-primary text-center" role="alert">
-            Waiting for server...
+          <div id="message-box">
+            <div class="waiting alert alert-primary text-center">
+              <div>
+                Waiting for server...
+              </div>
+              <div class="spinner-border spinner-border-sm" role="status"></div>
+            </div>
           </div>
         </div>
       </div>
