@@ -10,7 +10,11 @@ window.onload = () => {
 	window.board = document.getElementById("board");
 	window.messageBox = document.getElementById("message-box");
 	board.addEventListener("click", mark)
+	if(room_id === undefined){
+		invalidRoom();
+	}
 }
+
 window.socket = new WebSocket("wss://localhost:8080");
 window.socket.onopen = function () {
 	// Send message to recover match data
@@ -94,7 +98,7 @@ window.socket.onmessage = (event) => {
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
 
-		board.querySelectorAll('tile').forEach((tile) => {
+		window.board.querySelectorAll('tile').forEach((tile) => {
 			tile.classList.add("disabled");
 		});
 
@@ -114,6 +118,16 @@ window.socket.onmessage = (event) => {
 		});
 	}
 }
+
+window.socket.onclose = (event) => {
+	console.log('WebSocket closed with code:', event.code);
+	console.log('Close reason:', event.reason);
+
+	if(event.code == 4002){
+		console.log("Forbiden Room")
+		invalidRoom();
+	}
+};
 
 function updateMessageBox(){
 	window.playerNumber.then((playerNumber) => {
@@ -136,4 +150,12 @@ function mark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
 	window.socket.send(JSON.stringify({type: "move", tile: event.target.id}));
+}
+
+function invalidRoom(){
+	window.messageBox.querySelector(".waiting")
+		.classList.add("d-none");
+	window.messageBox.querySelector(".invalid")
+		.classList.remove("d-none");
+	window.board.classList.add("d-none");
 }
