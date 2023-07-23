@@ -6,7 +6,6 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\EventLoop\Factory;
-use Ratchet\RFC6455\Messaging\Frame;
 
 require_once '../vendor/autoload.php';
 require_once 'config/db.php';
@@ -80,7 +79,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 		// Closing connection due to inactivity
 		// 4001 (Inactivity Timeout)
-		$client->close(new Frame(pack('n', "Inactivity Timeout"), true, 4001));
+		$client->close(4001);
 	}
 
 	public function nextPlayer() {
@@ -215,7 +214,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			if(empty($room)){
 				// Forbidden room for current user
 				// 4002 (Forbidden Room)
-				$from->close(new Frame(pack('n', "Forbidden Room"), true, 4002));
+				$from->close(4002);
 				return;
 			}
 			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
@@ -328,7 +327,7 @@ $secure_websockets = new \React\Socket\SocketServer('127.0.0.1:8080', $context=a
 $secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
     'local_cert' => 'public.pem',
 	'local_pk' => 'private.pem',
-	'allow_self_signed' => TRUE,
+	'allow_self_signed' => TRUE, // Allow self signed certs (should be false in production)
     'verify_peer' => FALSE
 ]);
 
