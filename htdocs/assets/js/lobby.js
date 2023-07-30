@@ -14,12 +14,15 @@ var pressedPlay = false;
 
 // Enter is equivalent to click on Play/Confirm
 $(document).keyup((event) => {
-    if (event.keyCode == 13) {
+	var activeElement = document.activeElement;
+	if(activeElement.querySelector('#play-btn') === null) return;
+	if(activeElement.querySelector('#cancel-btn') === null) return;
+	if (event.keyCode == 13) {
 		if(pressedPlay){
-			confirmBtn.children().first().click();
+			cancelBtn.children().first().click();
 		}
 		else playBtn.children().first().click();
-    }
+	}
 });
 
 function showWaitingRoom(){
@@ -47,6 +50,7 @@ function cancel(){
 }
 
 $('#join-modal').on('hidden.bs.modal', function () {
+	cancel();
 	$(".tick").each(function(){
 		$(this).empty()
 	});
