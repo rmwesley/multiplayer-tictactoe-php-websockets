@@ -18,11 +18,12 @@ window.onload = () => {
 window.socket = new WebSocket("wss://localhost:8080");
 window.socket.onopen = function () {
 	// Send message to recover match data
-	usernamePromise.then((username) => {
+	userIdentityPromise.then((data) => {
 		message = {
 			type: "get_room_data",
 			room_id: room_id,
-			username: username
+			username: data.username,
+			guestUser: data.guestUser
 		};
 		window.socket.send(JSON.stringify(message));
 	});
@@ -38,7 +39,8 @@ window.socket.onmessage = (event) => {
 		window.username2 = message.username2;
 		window.boardMarkings = message.boardMarkings;
 
-		window.playerNumber = usernamePromise.then((username) => {
+		window.playerNumber = userIdentityPromise.then((data) => {
+			username = data.username;
 			if(window.username1 == username){
 				return 1;
 			}
@@ -58,7 +60,8 @@ window.socket.onmessage = (event) => {
 		window.turn = message.turn;
 
 		// Storing player symbol
-		window.usernamePromise.then((username) => {
+		userIdentityPromise.then((data) => {
+			username = data.username;
 			if (window.username1 == username) {
 				window.symbol = message.mark1;
 				window.opponent = window.username2;
@@ -102,7 +105,8 @@ window.socket.onmessage = (event) => {
 			tile.classList.add("disabled");
 		});
 
-		usernamePromise.then((username) => {
+		userIdentityPromise.then((data) => {
+			username = data.username;
 			if (message.winner == null){
 				document.getElementById("tie-message-box")
 					.classList.remove("d-none");

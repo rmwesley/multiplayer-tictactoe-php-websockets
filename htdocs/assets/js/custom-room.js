@@ -22,7 +22,7 @@ window.onload = () => {
 window.socket = new WebSocket("wss://localhost:8080");
 window.socket.onopen = function () {
 	// Send message to recover match data
-	usernamePromise.then((username) => {
+	userIdentityPromise.then((username) => {
 		message = {
 			type: "get_room_data",
 			room_id: room_id,
@@ -54,7 +54,7 @@ window.socket.onmessage = (event) => {
 		}
 		window.turn = message.turn;
 		// Storing current player symbol and opponent username
-		usernamePromise.then((username) => {
+		userIdentityPromise.then((username) => {
 			// Current player is player1
 			if (message.username1 == username) {
 				window.opponent = message.username2;
@@ -100,7 +100,7 @@ window.socket.onmessage = (event) => {
 
 		saveMove(message.lastMove, message.moveSymbol);
 
-		usernamePromise.then((username) => {
+		userIdentityPromise.then((username) => {
 			if (message.winner == null){
 				document.getElementById("tie-message-box")
 					.classList.remove("d-none");

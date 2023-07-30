@@ -6,8 +6,8 @@ const profileBtn = $("#profile-btn");
 
 const confirmBtn = $("#confirm-match-btn");
 
-usernamePromise.then((username) => {
-	profileBtn.innerHTML = username;
+userIdentityPromise.then((data) => {
+	profileBtn.innerHTML = data.username;
 })
 
 var pressedPlay = false;
