@@ -7,10 +7,11 @@ function clientWebSocketInit() {
 
 	window.ws.onopen = function () {
 		// Send a message to server to enqueue client websocket
-		usernamePromise.then((username) => {
+		userIdentityPromise.then((data) => {
 			this.send(JSON.stringify({
 				"type": "enqueue",
-				"username": username
+				"username": data.username,
+				"guestUser": data.guestUser
 			}));
 		})
 	};
@@ -36,7 +37,8 @@ function clientWebSocketInit() {
 			room_id = message.room_id;
 
 			joinModal.modal('show');
-			usernamePromise.then((username) => {
+			userIdentityPromise.then((data) => {
+				username = data.username;
 				if(joinModal.find('#player1').text() == username) {
 					window.player = joinModal.find('#player1');
 					window.opponent = joinModal.find('#player2');
