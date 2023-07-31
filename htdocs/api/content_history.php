@@ -33,7 +33,9 @@ function generate_history_table($history_data){
   </thead>
   <tbody>
 HERE;
-	foreach ($row as $history_data){
+
+	//foreach ($row as $history_data){
+	foreach ($history_data as $index => $row){
 		$match_div = generate_match_row($row);
 
 		$match_history_div .= "<tr>{$match_div}</th>\n";
@@ -46,7 +48,10 @@ $username = $_SESSION['username'];
 if($username == 'alice'){
 	$sql = "SELECT * FROM rooms";
 	$result = $conn->query($sql);
-	$match_history_table = generate_history_table($result);
+	// MYSQLI_ASSOC keeps the column names as keys in the arrays
+	$history_data = $result->fetch_all(MYSQLI_ASSOC);
+
+	$match_history_table = generate_history_table($history_data);
 	return;
 }
 
@@ -58,5 +63,6 @@ $statement = $conn->prepare($sql);
 $statement->bind_param('ss', $username, $username);
 $statement->execute();
 $result = $statement->get_result();
+$history_data = $result->fetch_all();
 
 $match_history_table = generate_history_table($result);
