@@ -43,7 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Store the username in session
+    // Store the username in session after clearing it
+	session_unset();
     $_SESSION['username'] = $username;
 
     // Close prepared statement
