@@ -10,7 +10,7 @@ use React\EventLoop\Factory;
 require_once 'vendor/autoload.php';
 require_once 'config/db.php';
 
-class WsHandler implements Ratchet\MessageComponentInterface {
+class GameWsServer implements Ratchet\MessageComponentInterface {
 	private $queue;
 	private $queueCounter;
 	private $rooms;
@@ -319,7 +319,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 $ws_handler = new \Ratchet\Http\HttpServer(
     new \Ratchet\WebSocket\WsServer(
-        new WsHandler()
+        new GameWsServer()
     )
 );
 
