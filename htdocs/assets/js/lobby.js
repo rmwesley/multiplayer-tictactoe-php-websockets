@@ -2,6 +2,7 @@
 var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn, pressedPlay;
 
 window.onload = () => {
+	startChatBox();
 	playBtn = $("#play-btn");
 	cancelBtn = $("#cancel-btn");
 	waitingRoom = $("#waiting-room");

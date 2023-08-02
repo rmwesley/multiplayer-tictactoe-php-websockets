@@ -7,6 +7,7 @@ const url = new URL(window.location.href);
 const room_id = url.searchParams.get("room_id");
 
 window.onload = () => {
+	startChatBox();
 	window.board = document.getElementById("board");
 	window.messageBox = document.getElementById("message-box");
 	board.addEventListener("click", mark)
