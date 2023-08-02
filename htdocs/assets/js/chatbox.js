@@ -1,8 +1,59 @@
+class MessageArea {
+	constructor(element){
+		this.area = element;
+	}
+
+	addMessage(source, content) {
+		var message = document.createTextNode(content);
+
+		this.area.appendChild(message);
+	}
+}
+
 function startChatBox() {
 	chatbox = document.getElementById("chatbox");
-	header = document.getElementById("chatbox-header")
+	messageArea = new MessageArea(chatbox.querySelector(".messages"));
+	typingInputField = chatbox.querySelector(".write_msg");
+	sendBtn = chatbox.querySelector(".msg_send_btn");
 
+	header = document.getElementById("chatbox-header")
 	draggableChatBox(chatbox, header);
+
+	chatSocket = new WebSocket("wss://localhost:8081");
+
+	chatSocket.onopen = function () {
+		userIdentityPromise.then((data) => {
+			this.send(JSON.stringify({
+				"type": "join",
+				"username": data.username,
+				//"guestUser": data.guestUser
+			}));
+		});
+
+		messageArea.addMessage("<LOCAL>", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
+	}
+	chatSocket.onmessage = function (event) {
+		message = JSON.parse(event.data);
+		messageArea.addMessage(message.source, message.content);
+	}
+
+	function sendMessage(){
+		userIdentityPromise.then((data) => {
+			if(typingInputField.value != ""){
+				chatSocket.send(JSON.stringify({
+					"type": "message",
+					"username": data.username,
+					"content": typingInputField.value
+					//"guestUser": data.guestUser
+				}));
+			};
+			typingInputField.value = "";
+		});
+	}
+	sendBtn.addEventListener('click', sendMessage);
+	typingInputField.onkeyup = function(event) {
+		if(event.keyCode == 13) sendMessage();
+	}
 }
 
 // Make chatbox a draggable (drag and drop) element
