@@ -6,7 +6,23 @@ class MessageArea {
 		return source == "admin" || source == "rmwesley";
 	}
 
-	addMessage(source, content) {
+	addSystemMessage(source, content) {
+		let message = document.createElement("div");
+
+		let messageUsername = document.createElement("span");
+		messageUsername.className = "chat-msg-username";
+		messageUsername.innerHTML = source;
+
+		let messageContent = document.createElement("span");
+		messageContent.className = "chat-msg-content";
+		messageContent.innerHTML = content;
+
+		message.appendChild(messageUsername);
+		message.appendChild(messageContent);
+
+		this.area.appendChild(message);
+	}
+	addMessage(source, content, time) {
 		let message = document.createElement("div");
 
 		let messageUsername = document.createElement("span");
@@ -21,8 +37,13 @@ class MessageArea {
 		messageContent.className = "chat-msg-content";
 		messageContent.innerHTML = content;
 
+		let messageTime = document.createElement("span");
+		messageTime.className = "chat-msg-time";
+		messageTime.innerHTML = time;
+
 		message.appendChild(messageUsername);
 		message.appendChild(messageContent);
+		message.appendChild(messageTime);
 
 		this.area.appendChild(message);
 	}
@@ -48,11 +69,12 @@ function startChatBox() {
 			}));
 		});
 
-		messageArea.addMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
+		messageArea.addSystemMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
 	}
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
-		messageArea.addMessage(message.source, message.content);
+		dateString = new Date(1000 * message.time).toLocaleTimeString();
+		messageArea.addMessage(message.source, message.content, dateString);
 	}
 
 	function sendMessage(){

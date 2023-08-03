@@ -51,13 +51,12 @@ class ChatServer implements Ratchet\MessageComponentInterface {
 				$conn->send(json_encode([
 					"source" => $from->username,
 					"content" => $payload['content'],
+					"time" => time(),
 				]));
 			}
-
 			break;
 		}
 	}
-
 }
 
 $ws_handler = new \Ratchet\Http\HttpServer(

@@ -57,3 +57,6 @@
 .admin-user {
 	color: darkgreen !important;
 }
+.chat-msg-time {
+	float:right;
+}
