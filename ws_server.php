@@ -7,7 +7,7 @@ use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\EventLoop\Factory;
 
-require_once '../vendor/autoload.php';
+require_once 'vendor/autoload.php';
 require_once 'config/db.php';
 
 class WsHandler implements Ratchet\MessageComponentInterface {

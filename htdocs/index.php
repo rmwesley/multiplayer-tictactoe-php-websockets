@@ -1,11 +1,12 @@
 <?php
 session_start();
 
+include_once "api/content_pages.php";
 include_once "api/content_navbar.php";
 
 // Check if user is not yet logged in
 if (empty($_SESSION['username'])) {
-	// Display the registration/login form
+	// Display the home page
 	include "views/home.html";
 	exit;
 }
@@ -15,6 +16,7 @@ $username = $_SESSION['username'];
 // Get navbar and insert username
 $navbar = str_replace("{{username}}", $username, $navbar);
 
+checkPage($_GET['page']);
 
 switch($_GET['page']){
 case 'game':
