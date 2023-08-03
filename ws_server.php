@@ -107,7 +107,8 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		if(!isset($player1) || !isset($player2)) return;
 
 		// Same player in different sessions
-		if($player1->username == $player2->username) return;
+		if($player1->username == $player2->username &&
+			$player1->guestUser == $player2->guestUser) return;
 
 		// Create a new entry in the rooms table
 		$query = "INSERT INTO rooms (player1, player2) VALUES ('$player1->username', '$player2->username')";
@@ -178,6 +179,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 		switch($type) {
 		case 'enqueue':
 			$from->username = $payload['username'];
+			$from->guestUser = $payload['guestUser'];
 			$this->enqueue($from);
 			break;
 		case 'ping':

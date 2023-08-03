@@ -2,23 +2,27 @@
 session_start();
 
 include_once "api/content_pages.php";
-include_once "api/content_navbar.php";
 
 // Check if user is not yet logged in
-if (empty($_SESSION['username'])) {
-	// Display the home page
-	include "views/home.html";
-	exit;
+if (!array_key_exists('username', $_SESSION)) {
+	// Access as guest
+	if (!array_key_exists('guest_id', $_SESSION)) {
+		header("Location: api/guest_auth.php");
+	}
 }
 
 $username = $_SESSION['username'];
 
-// Get navbar and insert username
-$navbar = str_replace("{{username}}", $username, $navbar);
+// After setting the username, we can now include the navbar
+include_once "api/content_navbar.php";
 
-checkPage($_GET['page']);
+$page = 'lobby';
+if(isset($_GET['page'])){
+	$page = $_GET['page'];
+}
+checkPage($page);
 
-switch($_GET['page']){
+switch($page){
 case 'game':
 	$room_id = $_GET['room_id'];
 

@@ -1,54 +1,74 @@
 <?php
 session_start();
+// Opening database connection
+include_once '../../config/db.php';
 
-// Check if a form was submitted and handle it
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Opening database connection
-    require_once '../../config/db.php';
-
-    // Sanitize input data
-    $username = $conn->real_escape_string($_POST['username']);
-    $password = $conn->real_escape_string($_POST['password']);
-
-    // Validate input data
+// Validate input data
+function validate_auth_fields($username, $password): bool{
     if (empty($username) || empty($password)) {
-        $_SESSION['error'] = "Login failed";
-        header("location: ../index.php?loginFailed=true");
-        exit;
+        return false;
     }
+    return true;
+}
 
+function find_by_username($username){
+    global $conn;
     // Prepare and execute the query using prepared statements
     $sql = "SELECT * FROM users WHERE username = ?";
     $statement = $conn->prepare($sql);
 
-    // Bind username, a string paramater
+    // Bind username, a string parameter
     $statement->bind_param('s', $username);
     $statement->execute();
 
-    // Check if username exists
     $result = $statement->get_result();
-    if (mysqli_num_rows($result) == 0) {
-        $_SESSION['error'] = "Login failed";
-        header("location: ../index.php?loginFailed=true");
-        exit;
-    }
-
-    // Fetch the user data
-    $row = $result->fetch_assoc();
-
-    // Verify the password
-    if (!password_verify($password, $row['hash'])) {
-        $_SESSION['error'] = "Login failed";
-        header("location: ../index.php?loginFailed=true");
-        exit;
-    }
-
-    // Store the username in session
-    $_SESSION['username'] = $username;
 
     // Close prepared statement
     $statement->close();
-    // Closing database connection
+
+    // Return the user data row
+    return $result->fetch_assoc();
+}
+
+function log_user_in($username): bool {
+    session_unset();
+    // Prevent session fixation attack
+    if (session_regenerate_id()) {
+        // Set username in the session
+        $_SESSION['username'] = $username;
+        return true;
+    }
+
+    return false;
+}
+
+// Check if a POST form was submitted and handle it
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    if(!validate_auth_fields($username, $password)){
+        header("location: ../index.php?loginFailed=true");
+        exit;
+    }
+
+    $row = find_by_username($username);
+    // Check if user was found
+    if (empty($row)) {
+        header("location: ../index.php?loginFailed=true");
+        exit;
+    }
+
+    // Verify the password
+    if (!password_verify($password, $row['hash'])) {
+        header("location: ../index.php?loginFailed=true");
+        exit;
+    }
+
+    // Log in by clearing the session and storing the username in it
+    log_user_in($username);
+
+    // Close database connection
     $conn->close();
 
     header("Location: ../index.php?page=lobby");
