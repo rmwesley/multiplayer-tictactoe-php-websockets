@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 require_once __DIR__ . '/../../config/db.php';
 
 function generate_match_row($match_data){
@@ -21,7 +19,7 @@ HERE;
 	return $match_div;
 }
 
-function generate_history_table(mysqli_result $history_data){
+function generate_history_table($history_data){
 	$match_history_div = "<table class='table'>";
 	$match_history_div .= <<< HERE
   <thead>
@@ -35,7 +33,7 @@ function generate_history_table(mysqli_result $history_data){
   </thead>
   <tbody>
 HERE;
-	while ($row = $history_data->fetch_assoc()){
+	foreach ($row as $history_data){
 		$match_div = generate_match_row($row);
 
 		$match_history_div .= "<tr>{$match_div}</th>\n";
@@ -44,11 +42,6 @@ HERE;
 }
 
 $username = $_SESSION['username'];
-
-if(is_null($username)){
-	echo "You are not logged in";
-	exit;
-}
 
 if($username == 'alice'){
 	$sql = "SELECT * FROM rooms";
