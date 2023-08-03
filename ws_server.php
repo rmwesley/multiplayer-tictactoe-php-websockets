@@ -1,132 +1,14 @@
 <?php
+require_once 'Room.class.php';
 
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\Loop;
 use React\EventLoop\Factory;
-use Ratchet\RFC6455\Messaging\Frame;
 
 require_once '../vendor/autoload.php';
 require_once 'config/db.php';
-
-class Room {
-	private $roomId;
-	private $board = "_________";
-	private $turn = 1;
-	private $player1;
-	private $player2;
-	private $xPlayerNumber;
-
-	function linkPlayers(){
-		$this->player1->roomId = $this->roomId;
-		$this->player2->roomId = $this->roomId;
-	}
-	function __construct($player1, $player2, $roomId){
-		$this->player1 = $player1;
-		$this->player2 = $player2;
-		$this->roomId = $roomId;
-		$this->xPlayerNumber = rand(1,2);
-
-		$this->linkPlayers();
-	}
-
-	function getPlayer1(){
-		return $this->player1;
-	}
-	function getPlayer2(){
-		return $this->player2;
-	}
-	function getXPlayerNumber(){
-		return $this->xPlayerNumber;
-	}
-	function getTurn(){
-		return $this->turn;
-	}
-	function getBoard(){
-		return $this->board;
-	}
-	function updatePlayerConnection($from){
-		if ($from->username == $this->player1->username) {
-			$this->player1 = $from;
-		}
-		else $this->player2 = $from;
-	}
-	function isInRoom($from){
-		if($from->username == $this->player1->username
-			|| $from->username == $this->player2->username){
-				return true;
-			}
-		return false;
-	}
-	function getCurrentPlayer(){
-		// Odd turn
-		if($this->getTurn()%2 == 1){
-			return $this->player1;
-		}
-		return $this->player2;
-	}
-	function currentIsX(){
-		// Turn is odd
-		if($this->getTurn()%2 == 1){
-			// Is odd player X?
-			return $this->xPlayerNumber == 1;
-		}
-		// Turn is even
-		// Is even player X?
-		return $this->xPlayerNumber == 2;
-	}
-	function getCurrentSymbol(){
-		if ($this->currentIsX()){
-			return 'X';
-		}
-		return 'O';
-	}
-	function nextMove($move){
-		$this->turn++;
-		$this->board[$move] = $this->getCurrentSymbol();
-	}
-
-	function getWinner(){
-		if($this->getTurn() < 3) return;
-		$winner = $this->checkVerticals();
-		$winner = $this->checkHorizontals() ?? $winner;
-		$winner = $this->checkDiagonals() ?? $winner;
-		return $winner;
-	}
-	function gameOver(){
-		if($this->turn > 9) return true;
-		if($this->getWinner() != null) return true;
-	}
-	function checkHorizontals(){
-		for ($i=0; $i<3; $i++) {
-			$winner = $this->board[3*$i];
-			if($winner == "_") continue;
-			if($this->board[3*$i+1] == $winner && $this->board[3*$i+2] == $winner){
-				return $winner;
-			}
-		}
-	}
-	function checkVerticals(){
-		for ($j=0; $j<3; $j++) {
-			$winner = $this->board[$j];
-			if($winner == "_") continue;
-			if($this->board[$j+3] == $winner && $this->board[$j+6] == $winner){
-				return $winner;
-			}
-		}
-	}
-	function checkDiagonals(){
-		$winner = $this->board[4];
-		if($winner == "_") return;
-		if($this->board[0] == $winner && $this->board[8] == $winner) return $winner;
-		if($this->board[2] == $winner && $this->board[6] == $winner) return $winner;
-	}
-
-	function checkAvailability($move){
-		return $this->board[$move] == "_";
-	}
-}
 
 class WsHandler implements Ratchet\MessageComponentInterface {
 	private $queue;
@@ -156,6 +38,9 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 	public function onClose(Ratchet\ConnectionInterface $from) {
 		if ($from->state == "joined_room") {
 			$room_id = $from->roomId;
+			$query = "DELETE FROM rooms WHERE id='$room_id'";
+			$this->db->query($query);
+
 			$opponent = $this->getOpponent($from);
 			// If opponent already closed, just unset the room
 			if($opponent->state == "closed"){
@@ -194,7 +79,7 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 		// Closing connection due to inactivity
 		// 4001 (Inactivity Timeout)
-		$client->close(new Frame(pack('n', "Inactivity Timeout"), true, 4001));
+		$client->close(4001);
 	}
 
 	public function nextPlayer() {
@@ -220,6 +105,9 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 
 		// Could not find 2 available players
 		if(!isset($player1) || !isset($player2)) return;
+
+		// Same player in different sessions
+		if($player1->username == $player2->username) return;
 
 		// Create a new entry in the rooms table
 		$query = "INSERT INTO rooms (player1, player2) VALUES ('$player1->username', '$player2->username')";
@@ -323,10 +211,10 @@ class WsHandler implements Ratchet\MessageComponentInterface {
 			$from->username = $username;
 
 			$room = $this->rooms[$room_id] ?? null;
-			if($room==null){
+			if(empty($room)){
 				// Forbidden room for current user
 				// 4002 (Forbidden Room)
-				$from->close(new Frame(pack('n', "Forbidden Room"), true, 4002));
+				$from->close(4002);
 				return;
 			}
 			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
@@ -439,7 +327,7 @@ $secure_websockets = new \React\Socket\SocketServer('127.0.0.1:8080', $context=a
 $secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
     'local_cert' => 'public.pem',
 	'local_pk' => 'private.pem',
-	'allow_self_signed' => TRUE,
+	'allow_self_signed' => TRUE, // Allow self signed certs (should be false in production)
     'verify_peer' => FALSE
 ]);
 
