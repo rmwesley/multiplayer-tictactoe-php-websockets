@@ -6,6 +6,7 @@ const url = new URL(window.location.href);
 // Extract the values of room_id, player1 and player2 from the URL
 const room_id = url.searchParams.get("room_id");
 window.onload = () => {
+	startChatBox();
 	const board = document.getElementById("board");
 	// Listen for click events on board
 	board.addEventListener("click", mark)

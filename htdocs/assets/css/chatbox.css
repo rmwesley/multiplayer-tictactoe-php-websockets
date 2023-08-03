@@ -1,0 +1,80 @@
+#chatbox {
+	z-index: 9;
+	position: absolute;
+
+	width: 480px;
+	height: 270px;
+	bottom:5px;
+	right:5px;
+
+	overflow: hidden;
+}
+#chatbox > .messages{
+	width: 480px;
+	height: 210px;
+
+	overflow-y: scroll;
+	padding: 10px;
+}
+
+::-webkit-scrollbar {
+	background-color: transparent;
+	width: 10px;
+}
+::-webkit-scrollbar-track {
+	background-color: transparent;
+	width: 10px;
+}
+.messages:hover::-webkit-scrollbar-thumb{
+	width:6px;
+	background-color: #414451;
+}  
+body:hover::-webkit-scrollbar-thumb {
+	width:6px;
+	background-color: #414451;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: #414451;
+}
+
+#chatbox-header {
+	z-index: 10;
+	cursor: grab;
+
+	width: 480px;
+	text-align:center;
+}
+
+#chatbox button, input[type="submit"], input[type="reset"] {
+	background: none;
+	color: inherit;
+	border: none;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#chatbox .typing_area {
+	display: flex;
+
+	width: 460px;
+	height: 20px;
+
+	justify-content: center;
+}
+
+.chat-msg-username {
+	color: green;
+}
+.chat-msg-username:after {
+	content: ": ";
+}
+.admin-user {
+	color: darkgreen !important;
+}
+.chat-msg-time {
+	float:right;
+}

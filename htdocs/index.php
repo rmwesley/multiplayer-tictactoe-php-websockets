@@ -2,6 +2,7 @@
 session_start();
 
 include_once "api/content_pages.php";
+include_once "api/content_chatbox.php";
 
 // Check if user is not yet logged in
 if (!array_key_exists('username', $_SESSION)) {
@@ -55,5 +56,6 @@ default:
 	break;
 }
 $html = str_replace("<body>", "<body>".$navbar, $html);
+$html = str_replace("</body>", $chatbox."<body>", $html);
 echo $html;
 ?>
