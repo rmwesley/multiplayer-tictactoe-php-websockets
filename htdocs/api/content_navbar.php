@@ -9,8 +9,8 @@ $loginForm = <<< HERE
   <div class="form-group mb-3">
     <input name="password" type="password" placeholder="Password" class="form-control">
   </div>
-  <div class="d-flex justify-content-center">
-    <input type="submit" value="Login" class="btn btn-primary">
+  <div class="d-flex justify-content-center btn btn-outline-primary">
+    <input type="submit" value="Login">
   </div>
 </form>
 HERE;
@@ -26,7 +26,7 @@ $registerForm = <<< HERE
   <div class="form-group mb-2">
     <input name="confirmation" type="password" placeholder="Confirm Password" class="form-control">
   </div>
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center btn btn-outline-primary">
     <input type="submit" value="Register">
   </div>
 </form>
@@ -222,8 +222,8 @@ $logoutButton = "";
 if(!isset($_SESSION['guest_id'])){
 	// Setting up logout button
 	$logoutButton = <<< HERE
-<form action="api/logout.php" method="post">
-  <input name="Logout" type="submit" value="Logout" class="btn btn-outline-danger">
+<form action="api/logout.php" method="post" class="btn btn-outline-danger">
+  <input name="Logout" type="submit" value="Logout">
 </form>
 HERE;
 }
