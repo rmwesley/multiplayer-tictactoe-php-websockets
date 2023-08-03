@@ -20,7 +20,21 @@ if(empty($_GET['room_id'])){
 
 $room_id = $_GET['room_id'];
 
-$html = file_get_contents("views/game.html");
+// Setup/choose room css style
+$style = "default";
+if(isset($_GET['room_style'])){
+	$style = $_GET['room_style'];
+}
+
+if($style == "custom"){
+	$html = file_get_contents("views/custom-room.html");
+	$html = str_replace("{{username}}", $username, $html);
+	$html = str_replace("{{roomId}}", $room_id, $html);
+	echo $html;
+	exit;
+}
+
+$html = file_get_contents("views/default-room.html");
 $html = str_replace("{{username}}", $username, $html);
 $html = str_replace("{{roomId}}", $room_id, $html);
 echo $html;

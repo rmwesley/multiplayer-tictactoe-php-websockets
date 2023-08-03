@@ -1,0 +1,15 @@
+.tile{
+	user-select: none;
+	display: flex;
+	justify-content: center;
+	width: min(20%, 200px);
+	padding-bottom: min(20%, 200px);
+}
+#board{
+	opacity: 1;
+	background-color: #1068A0
+}
+.X,.O,.loading{
+	font-size: min(15vw, 160px);
+	position:absolute;
+}

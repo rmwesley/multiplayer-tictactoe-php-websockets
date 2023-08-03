@@ -100,6 +100,5 @@ function mark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
 	window.socket.send(JSON.stringify({type: "move", tile: event.target.id}));
-	event.target.classList.add("disabled", window.symbol);
 }
 
