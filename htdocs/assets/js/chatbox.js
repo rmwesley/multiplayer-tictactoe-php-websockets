@@ -2,9 +2,27 @@ class MessageArea {
 	constructor(element){
 		this.area = element;
 	}
+	checkAdmin(source){
+		return source == "admin" || source == "rmwesley";
+	}
 
 	addMessage(source, content) {
-		var message = document.createTextNode(content);
+		let message = document.createElement("div");
+
+		let messageUsername = document.createElement("span");
+		messageUsername.className = "chat-msg-username";
+		messageUsername.innerHTML = source;
+
+		if(this.checkAdmin(source)){
+			messageUsername.classList.add("admin-user");
+		}
+
+		let messageContent = document.createElement("span");
+		messageContent.className = "chat-msg-content";
+		messageContent.innerHTML = content;
+
+		message.appendChild(messageUsername);
+		message.appendChild(messageContent);
 
 		this.area.appendChild(message);
 	}
@@ -30,7 +48,7 @@ function startChatBox() {
 			}));
 		});
 
-		messageArea.addMessage("<LOCAL>", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
+		messageArea.addMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
 	}
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
