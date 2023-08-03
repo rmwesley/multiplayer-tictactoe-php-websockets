@@ -1,29 +1,33 @@
-const playBtn = $("#play-btn");
-const cancelBtn = $("#cancel-btn");
-const waitingRoom = $("#waiting-room");
+// Global variables
+var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn, pressedPlay;
 
-const profileBtn = $("#profile-btn");
+window.onload = () => {
+	playBtn = $("#play-btn");
+	cancelBtn = $("#cancel-btn");
+	waitingRoom = $("#waiting-room");
+	confirmBtn = $("#confirm-match-btn");
+	pressedPlay = false;
 
-const confirmBtn = $("#confirm-match-btn");
+	//$(document).ready(function(){
+	//	$(this).click(function() {
+	//	   var activeElement = document.activeElement;
+	//	   console.log(activeElement.tagName, activeElement.type || 'N/A');
+	//	 });
+	//   });
 
-userIdentityPromise.then((data) => {
-	profileBtn.innerHTML = data.username;
-})
-
-var pressedPlay = false;
-
-// Enter is equivalent to click on Play/Confirm
-$(document).keyup((event) => {
-	var activeElement = document.activeElement;
-	if(activeElement.querySelector('#play-btn') === null) return;
-	if(activeElement.querySelector('#cancel-btn') === null) return;
-	if (event.keyCode == 13) {
-		if(pressedPlay){
-			cancelBtn.children().first().click();
+	// Enter is equivalent to click on Play/Confirm
+	$(document).keyup((event) => {
+		var activeElement = document.activeElement;
+		if(activeElement.querySelector('#play-btn') === null) return;
+		if(activeElement.querySelector('#cancel-btn') === null) return;
+		if (event.keyCode == 13) {
+			if(pressedPlay){
+				cancelBtn.children().first().click();
+			}
+			else playBtn.children().first().click();
 		}
-		else playBtn.children().first().click();
-	}
-});
+	});
+}
 
 function showWaitingRoom(){
 	waitingRoom.removeClass("invisible").addClass("visible");
