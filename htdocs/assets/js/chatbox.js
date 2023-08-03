@@ -73,8 +73,17 @@ function startChatBox() {
 	}
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
-		dateString = new Date(1000 * message.time).toLocaleTimeString();
-		messageArea.addMessage(message.source, message.content, dateString);
+		if(message.type == "new_message"){
+			dateString = new Date(1000 * message.time).toLocaleTimeString();
+			messageArea.addMessage(message.source, message.content, dateString);
+		}
+		if(message.type == "history"){
+			message.history.forEach((chat_msg) => {
+				if(chat_msg == null) return;
+				dateString = new Date(1000 * chat_msg[2]).toLocaleTimeString();
+				messageArea.addMessage(chat_msg[0], chat_msg[1], dateString);
+			});
+		}
 	}
 
 	function sendMessage(){
