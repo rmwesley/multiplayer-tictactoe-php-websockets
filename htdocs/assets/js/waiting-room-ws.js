@@ -1,11 +1,13 @@
-const inactivityModal = $('#inactive-modal');
-const joinModal = $('#join-modal');
-var room_id = null;
+// Global DOM elements
+var playerElement, opponentElement, joinModal, inactivityModal;
+// Global variables
+var room_id;
+var waitingRoomWs;
 
 function clientWebSocketInit() {
-	window.ws = new WebSocket("wss://127.0.0.1:8080");
+	waitingRoomWs = new WebSocket("wss://127.0.0.1:8080");
 
-	window.ws.onopen = function () {
+	waitingRoomWs.onopen = function () {
 		// Send a message to server to enqueue client websocket
 		userIdentityPromise.then((data) => {
 			this.send(JSON.stringify({
@@ -16,7 +18,7 @@ function clientWebSocketInit() {
 		})
 	};
 
-	window.ws.onclose = (event) => {
+	waitingRoomWs.onclose = (event) => {
 		// User was inactive and was removed from match queue
 		if(event.code == 4001){
 			// Showing inactivity popup message
@@ -27,7 +29,7 @@ function clientWebSocketInit() {
 		setTimeout(300, hideWaitingRoom);
 	};
 
-	window.ws.onmessage = (event) => {
+	waitingRoomWs.onmessage = (event) => {
 		message = JSON.parse(event.data);
 		// Match found
 		if(message.type === 'match_found') {
@@ -40,22 +42,22 @@ function clientWebSocketInit() {
 			userIdentityPromise.then((data) => {
 				username = data.username;
 				if(joinModal.find('#player1').text() == username) {
-					window.player = joinModal.find('#player1');
-					window.opponent = joinModal.find('#player2');
+					playerElement = joinModal.find('#player1');
+					opponentElement = joinModal.find('#player2');
 				}
 				else{
-					window.player = joinModal.find('#player2');
-					window.opponent = joinModal.find('#player1');
+					playerElement = joinModal.find('#player2');
+					opponentElement = joinModal.find('#player1');
 				}
 			});
 		}
 		else if(message.type === "opponent_confirmed") {
 			// Update UI to show opponent confirmed
-			window.opponent.parent().parent().find(".tick").text("✓");
+			opponentElement.parent().parent().find(".tick").text("✓");
 		}
 		else if(message.type === "opponent_disconnected"){
 			// Update UI to show opponent disconnected
-			window.opponent.parent().parent().find(".tick").text("✕");
+			opponentElement.parent().parent().find(".tick").text("✕");
 			confirmBtn.prop("disabled", true);
 			cancel();
 		}

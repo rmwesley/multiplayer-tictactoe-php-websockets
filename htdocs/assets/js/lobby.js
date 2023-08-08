@@ -1,5 +1,7 @@
+// Global DOM elements
+var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn;
 // Global variables
-var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn, pressedPlay;
+var pressedPlay;
 
 window.onload = () => {
 	startChatBox();
@@ -7,6 +9,10 @@ window.onload = () => {
 	cancelBtn = $("#cancel-btn");
 	waitingRoom = $("#waiting-room");
 	confirmBtn = $("#confirm-match-btn");
+
+	inactivityModal = $('#inactive-modal');
+	joinModal = $('#join-modal');
+
 	pressedPlay = false;
 
 	//$(document).ready(function(){
@@ -63,7 +69,7 @@ $('#join-modal').on('hidden.bs.modal', function () {
 });
 
 function confirmMatch(){
-	window.player.parent().after("<span class='col-1 tick'>✓</span>");
+	playerElement.parent().after("<span class='col-1 tick'>✓</span>");
 	// Disable button
 	$("#confirm-match-button").prop("disabled", true);
 
