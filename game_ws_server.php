@@ -186,10 +186,17 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 			$from->timestamp = time();
 			break;
 		case 'confirm':
-			$from->state = "confirmed";
-
 			// Get opponent connection
 			$opponent = $this->getOpponent($from);
+
+			if(empty($opponent)){
+				// Cannot confirm without an opponent set
+				// 4003 (Invalid WS Message)
+				$from->close(4003);
+				return;
+			}
+
+			$from->state = "confirmed";
 
 			$response = json_encode(array(
 				'type' => 'opponent_confirmed',
