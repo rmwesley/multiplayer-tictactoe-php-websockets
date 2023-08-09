@@ -17,7 +17,11 @@ window.onload = () => {
 	startChatBox();
 	board = document.getElementById("board");
 	messageBox = document.getElementById("message-box");
-	board.addEventListener("click", mark)
+
+	// Board input as event listeners
+	board.addEventListener("click", clickMark);
+	document.body.addEventListener("keyup", keyMark);
+
 	if(room_id === undefined){
 		invalidRoom();
 	}
@@ -174,10 +178,15 @@ function setPlayerNumber() {
 		return 2;
 	});
 }
-function mark(event){
+function clickMark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
 	gameSocket.send(JSON.stringify({type: "move", tile: event.target.id}));
+}
+function keyMark(event){
+	if(event.key < '1') return;
+	if(event.key > '9') return;
+	document.getElementById(event.key-1).click();
 }
 function userInRoom(user){
 	return (player1 == user || player2 == user);
