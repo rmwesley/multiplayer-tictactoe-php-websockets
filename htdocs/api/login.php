@@ -12,10 +12,10 @@ function validate_auth_fields($username, $password): bool{
 }
 
 function find_by_username($username){
-    global $conn;
+    global $db_conn;
     // Prepare and execute the query using prepared statements
     $sql = "SELECT * FROM users WHERE username = ?";
-    $statement = $conn->prepare($sql);
+    $statement = $db_conn->prepare($sql);
 
     // Bind username, a string parameter
     $statement->bind_param('s', $username);
@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     log_user_in($username);
 
     // Close database connection
-    $conn->close();
+    $db_conn->close();
 
     header("Location: ../index.php?page=lobby");
 }

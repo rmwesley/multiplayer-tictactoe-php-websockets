@@ -2,10 +2,10 @@
 require_once '../../config/db.php';
 
 function validate_register_fields($username, $password): bool {
-    global $conn;
+    global $db_conn;
     // Check if username already exists
     $checkUsernameSql = "SELECT * FROM users WHERE username = '$username'";
-    $checkUsernameResult = mysqli_query($conn, $checkUsernameSql);
+    $checkUsernameResult = mysqli_query($db_conn, $checkUsernameSql);
 
     // Check if input data is empty
     if (empty($username) || empty($password)) {
@@ -37,10 +37,10 @@ function log_user_in($username): bool {
 
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    global $conn;
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-    $confirmPassword = mysqli_real_escape_string($conn, $_POST['confirmation']);
+    global $db_conn;
+    $username = mysqli_real_escape_string($db_conn, $_POST['username']);
+    $password = mysqli_real_escape_string($db_conn, $_POST['password']);
+    $confirmPassword = mysqli_real_escape_string($db_conn, $_POST['confirmation']);
 
     validate_register_fields($username, $password);
 
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Prepare and execute the query using prepared statements
     $sql = "INSERT INTO users(username, hash) VALUES(?, ?)";
-    $statement = $conn->prepare($sql);
+    $statement = $db_conn->prepare($sql);
     // Bind username, a string paramater
     $statement->bind_param('ss', $username, $hashedPassword);
     $statement->execute();
@@ -65,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     log_user_in($username);
 
     // Close database connection
-    $conn->close();
+    $db_conn->close();
 
     header("Location: ../index.php?registerSuccess=true");
 }

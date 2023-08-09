@@ -25,7 +25,7 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 		$this->rooms = array();
 
 		// Database connection
-		$this->db = $GLOBALS['conn'];
+		$this->db = $GLOBALS['db_conn'];
 	}
 
 	public function onOpen(Ratchet\ConnectionInterface $from) {
