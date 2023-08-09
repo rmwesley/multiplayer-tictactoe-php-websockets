@@ -12,14 +12,14 @@ require_once 'config/db.php';
 
 class GameWsServer implements Ratchet\MessageComponentInterface {
 	private $queue;
-	private $queueCounter;
+	private $queueSize;
 	private $rooms;
 	protected $db;
 
 	public function __construct() {
 		// A queue to hold WebSocket connections waiting for a match
 		$this->queue = new \SplQueue;
-		$queueCounter = 0;
+		$queueSize = 0;
 
 		// Currently open game rooms
 		$this->rooms = array();
@@ -63,11 +63,11 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 	private function enqueue($from) {
 		// Add client connection to the queue
 		$this->queue->enqueue($from);
-		$this->queueCounter++;
+		$this->queueSize++;
 		$from->state = "waiting";
 
 		// Call matchup if there are at least 2 players in the queue
-		if ($this->queueCounter >= 2) {
+		if ($this->queueSize >= 2) {
 			$this->matchup();
 		}
 	}
@@ -84,9 +84,9 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 
 	public function nextPlayer() {
 		// We keep dequeueing until an active player is found
-		while ($this->queueCounter > 0) {
+		while ($this->queueSize > 0) {
 			$client = $this->queue->dequeue();
-			$this->queueCounter--;
+			$this->queueSize--;
 
 			if(time() - $client->timestamp > 120){
 				$this->cleanInactive($client);
