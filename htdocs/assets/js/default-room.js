@@ -47,8 +47,8 @@ gameSocket.onmessage = (event) => {
 	message = JSON.parse(event.data);
 	if(message.type == "room_data"){
 		console.log(message);
-		player1 = message.username1;
-		player2 = message.username2;
+		player1 = message.player1;
+		player2 = message.player2;
 		boardMarkings = message.boardMarkings;
 
 		playerNumber = userIdentityPromise.then((data) => {

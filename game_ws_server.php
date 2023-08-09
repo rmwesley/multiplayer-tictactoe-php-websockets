@@ -228,12 +228,12 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 			}
 
 			$response = [
-				"username1" => $room->getPlayer1()->username,
-				"username2" => $room->getPlayer2()->username,
+				"type" => "room_data",
+				"player1" => $room->getPlayer1()->username,
+				"player2" => $room->getPlayer2()->username,
 				"boardMarkings" => $room->getBoard(),
 				"turn" => $room->getTurn(),
 				"xPlayerNumber" => $room->getXPlayerNumber(),
-				"type" => "room_data",
 			];
 			$from->send(json_encode($response));
 			break;
