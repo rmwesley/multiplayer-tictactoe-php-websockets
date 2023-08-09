@@ -63,6 +63,15 @@ class ChatServer implements Ratchet\MessageComponentInterface {
 					"time" => $time,
 				]));
 			}
+			if($this->chat->isFull()){
+				global $db_conn;
+				foreach($this->chat->sortedMessages() as $message){
+					$sql = "INSERT INTO messages(username, message, time) VALUES (?,?,?)";
+					$statement = $db_conn->prepare($sql);
+					$statement->bind_param('ssi', $message[0], $message[1], $message[2]);
+					$statement->execute();
+				}
+			}
 			break;
 		}
 	}

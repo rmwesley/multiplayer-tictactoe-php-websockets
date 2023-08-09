@@ -19,9 +19,14 @@ class ChatBox {
 		$this->start = $this->start % MESSAGE_COUNT;
 
 		$this->messages[$this->start] = [$source, $content, $time];
+		// Notice that $this->start is never 0 after this step...
 		$this->start++;
 	}
+	public function isFull(){
+		return $this->start >= MESSAGE_COUNT;
+	}
 	public function sortedMessages(){
+		if($this->isFull()) return $this->messages;
 		$result = new SplFixedArray(MESSAGE_COUNT);
 
 		// Oldest messages come after starting position
