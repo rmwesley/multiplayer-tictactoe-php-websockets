@@ -70,7 +70,7 @@ function startChatBox() {
 			}));
 		});
 
-		messageArea.addSystemMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
+		messageArea.addSystemMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't go divulging your crimes. Go to the dark web for that.")
 	}
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
@@ -111,6 +111,7 @@ function draggableChatBox(chatbox, header) {
 	var initialX = 0, initialY = 0, deltaX = 0, deltaY = 0;
 
 	header.onmousedown = dragMouseDown;
+	header.ontouchstart = dragTouchStart;
 
 	function dragMouseDown(e) {
 		e = e || window.event;
@@ -124,11 +125,18 @@ function draggableChatBox(chatbox, header) {
 		// Call a function whenever the cursor moves
 		document.onmousemove = elementDrag;
 	}
+	function dragTouchStart(e) {
+		// Get cursor position
+		initialX = e.touches[0].clientX;
+		initialY = e.touches[0].clientY;
+
+		document.addEventListener("touchend", closeTouch);
+
+		//document.ontouchmove = (event) => {
+		document.addEventListener("touchmove", elementDragTouch);
+	}
 
 	function elementDrag(e) {
-		e = e || window.event;
-		e.preventDefault();
-
 		// Calculate the cursor displacement
 		deltaX = e.clientX - initialX;
 		deltaY = e.clientY - initialY;
@@ -139,15 +147,19 @@ function draggableChatBox(chatbox, header) {
 		// Update the chatbox's position
 		chatbox.style.top = (chatbox.offsetTop + deltaY) + "px";
 		chatbox.style.left = (chatbox.offsetLeft + deltaX) + "px";
-
-		// Buggy simple solution, but corner is fixed at cursor position
-		//chatbox.style.left = e.clientX + "px";
-		//chatbox.style.top = e.clientY + "px";
 	}
 
+	function elementDragTouch(event) {
+		elementDrag(event.touches[0]);
+	}
 	function closeDragElement() {
 		// Stop moving when mouse button is released
 		document.onmouseup = null;
 		document.onmousemove = null;
 	}
+	function closeTouch() {
+		document.removeEventListener("touchend", closeTouch);
+		document.removeEventListener("touchmove", elementDragTouch);
+	}
 }
+
