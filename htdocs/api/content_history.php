@@ -29,6 +29,7 @@ function generate_history_table($history_data){
 	  <th scope='col'>Second</th>
 	  <th scope='col'>Final Board</th>
 	  <th scope='col'>Winner</th>
+	  <th scope='col'>Link</th>
 	</tr>
   </thead>
   <tbody>
