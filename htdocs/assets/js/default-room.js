@@ -50,35 +50,18 @@ gameSocket.onmessage = (event) => {
 		player1 = message.player1;
 		player2 = message.player2;
 		boardMarkings = message.boardMarkings;
-
-		playerNumber = userIdentityPromise.then((data) => {
-			username = data.username;
-			if(player1 == username){
-				return 1;
-			}
-			return 2;
-		});
-		playerNumber.then(()=>{
-			messageBox.querySelector(".waiting")
-				.classList.add("d-none");
-		})
-		updateBoard();
-		updateMessageBox();
-
 		turn = message.turn;
 
+		setupBoard();
+
+		// Determining player order
+		setPlayerNumber();
+
 		// Storing player symbol
-		userIdentityPromise.then((data) => {
-			username = data.username;
-			if (player1 == username) {
-				symbol = message.mark1;
-				opponent = player2;
-			}
-			else {
-				opponent = player1;
-				symbol = message.mark2;
-			}
-		});
+		setPlayerSymbol();
+
+		// Showing turn information
+		updateTurnMessageBox();
 	}
 	if(message.type == "room_update"){
 		console.log(message);
@@ -88,7 +71,7 @@ gameSocket.onmessage = (event) => {
 		tile.classList.add("disabled", message.moveSymbol)
 
 		turn = message.turn;
-		updateMessageBox();
+		updateTurnMessageBox();
 	}
 	if(message.type == "invalid_move" || message.type == "not_your_turn"){
 		console.log(message);
@@ -99,6 +82,7 @@ gameSocket.onmessage = (event) => {
 		console.log(message);
 		boardMarkings = message.boardMarkings;
 		turn = message.turn;
+		setupBoard();
 
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
@@ -117,7 +101,7 @@ gameSocket.onclose = (event) => {
 	}
 };
 
-function updateBoard(){
+function setupBoard(){
 	for(let i = 0; i < boardMarkings.length; i++){
 		let symbol = boardMarkings.charAt(i);
 		if(symbol == "_") continue;
@@ -125,23 +109,22 @@ function updateBoard(){
 	}
 }
 
-function updateMessageBox(){
-	playerNumber.then((number) => {
-		if(number == null) return;
-		if(turn % 2 == number % 2){
-			messageBox.querySelector(".players-turn")
-				.classList.remove("d-none");
-			messageBox.querySelector(".opponents-turn")
-				.classList.add("d-none");
-		}
-		else{
-			messageBox.querySelector(".players-turn")
-				.classList.add("d-none");
-			messageBox.querySelector(".opponents-turn")
-				.classList.remove("d-none");
-		}
-	});
+function updateTurnMessageBox(){
+	if(playerNumber == null) return;
+	if(turn % 2 == playerNumber % 2){
+		messageBox.querySelector(".players-turn")
+			.classList.remove("d-none");
+		messageBox.querySelector(".opponents-turn")
+			.classList.add("d-none");
+	}
+	else{
+		messageBox.querySelector(".players-turn")
+			.classList.add("d-none");
+		messageBox.querySelector(".opponents-turn")
+			.classList.remove("d-none");
+	}
 }
+
 function showResult(){
 	userIdentityPromise.then((data) => {
 		username = data.username;
@@ -164,33 +147,54 @@ function showResult(){
 }
 
 function setPlayerNumber() {
-	playerNumber = userIdentityPromise.then((data) => {
+	userIdentityPromise.then((data) => {
 		messageBox.querySelector(".waiting")
 			.classList.add("d-none");
 		username = data.username;
 		// Non-playing user
 		if(!userInRoom(username)){
-			return null;
+			playerNumber = null;
+			return;
 		}
 		if(player1 == username){
-			return 1;
+			playerNumber = 1;
 		}
-		return 2;
+		else {
+			playerNumber = 2;
+		}
 	});
 }
+
+function setPlayerSymbol(){
+	userIdentityPromise.then((data) => {
+		username = data.username;
+		if (player1 == username) {
+			symbol = message.mark1;
+			opponent = player2;
+		}
+		else {
+			opponent = player1;
+			symbol = message.mark2;
+		}
+	});
+}
+
 function clickMark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
 	gameSocket.send(JSON.stringify({type: "move", tile: event.target.id}));
 }
+
 function keyMark(event){
 	if(event.key < '1') return;
 	if(event.key > '9') return;
 	document.getElementById(event.key-1).click();
 }
+
 function userInRoom(user){
 	return (player1 == user || player2 == user);
 }
+
 function invalidRoom(){
 	messageBox.querySelector(".waiting")
 		.classList.add("d-none");
