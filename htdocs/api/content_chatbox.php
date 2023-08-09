@@ -5,9 +5,9 @@ $chatbox = <<< HERE
     Chat
   </div>
 
-  <div class="messages">
+  <div class="messages border">
   </div>
-  <div class="typing_area">
+  <div class="typing_area border">
       <div class="typing_box">
         <input type="text" class="write_msg" placeholder="Enter a message">
       </div>

@@ -11,6 +11,7 @@ class MessageArea {
 
 		let messageUsername = document.createElement("span");
 		messageUsername.className = "chat-msg-username";
+		messageUsername.classList.add("local");
 		messageUsername.innerHTML = source;
 
 		let messageContent = document.createElement("span");
