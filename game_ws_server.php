@@ -159,6 +159,31 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 		return $room->getPlayer1();
 	}
 
+	private function get_result_from_database($room_id, $from){
+		$username = $from->username;
+
+		$sql = "SELECT * FROM rooms WHERE id = '$room_id'";
+		$row = $this->db->query($sql)->fetch_assoc();
+
+		if($row["player1"] != $username && $row["player2"] != $username && !$this->isAdmin($from)){
+			// Forbidden room for current user
+			// 4002 (Forbidden Room)
+			$from->close(4002);
+		}
+		if(isset($row["winner"])){
+			return [
+				'type' => 'finished_game',
+				'boardMarkings' => $row["board_markings"],
+				'winner' => $row["winner"],
+			];
+		}
+		return [
+			"type" => "room_data",
+			"player1" => $row["player1"],
+			"player2" => $row["player2"],
+			'boardMarkings' => $row["board_markings"],
+		];
+	}
 	public function isAdmin($from){
 		if($from->username == "alice") return true;
 	}
@@ -212,15 +237,18 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 
 			$room = $this->rooms[$room_id] ?? null;
 			if(empty($room)){
+				if(!isset($room_id)) {
+					$from->close(4002);
+					break;
+				}
+				$response = $this->get_result_from_database($room_id, $from);
+				$from->send(json_encode($response));
+				break;
+			}
+			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
 				// Forbidden room for current user
 				// 4002 (Forbidden Room)
 				$from->close(4002);
-				return;
-			}
-			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
-				$from->send(
-					json_encode("Access denied! You aren't in this room.")
-				);
 				break;
 			}
 			if($room->isInRoom($from)){

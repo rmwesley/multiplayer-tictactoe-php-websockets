@@ -88,7 +88,15 @@ gameSocket.onmessage = (event) => {
 		tile.classList.add("disabled", message.moveSymbol)
 
 		showResult();
-	};
+	}
+	if(message.type == "finished_game"){
+		setPlayerNumber();
+
+		boardMarkings = message.boardMarkings;
+		setupBoard();
+
+		updateTurnMessageBox();
+	}
 }
 
 gameSocket.onclose = (event) => {
