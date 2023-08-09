@@ -12,20 +12,20 @@ require_once 'config/db.php';
 
 class GameWsServer implements Ratchet\MessageComponentInterface {
 	private $queue;
-	private $queueCounter;
+	private $queueSize;
 	private $rooms;
 	protected $db;
 
 	public function __construct() {
 		// A queue to hold WebSocket connections waiting for a match
 		$this->queue = new \SplQueue;
-		$queueCounter = 0;
+		$queueSize = 0;
 
 		// Currently open game rooms
 		$this->rooms = array();
 
 		// Database connection
-		$this->db = $GLOBALS['conn'];
+		$this->db = $GLOBALS['db_conn'];
 	}
 
 	public function onOpen(Ratchet\ConnectionInterface $from) {
@@ -50,9 +50,9 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 				$from->state = "closed";
 
 				// Notify the player that their opponent has disconnected
-				$response = json_encode(array(
+				$response = json_encode([
 					'type' => 'opponent_disconnected'
-				));
+				]);
 				$opponent->send($response);
 				$opponent->close();
 			}
@@ -63,11 +63,11 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 	private function enqueue($from) {
 		// Add client connection to the queue
 		$this->queue->enqueue($from);
-		$this->queueCounter++;
+		$this->queueSize++;
 		$from->state = "waiting";
 
 		// Call matchup if there are at least 2 players in the queue
-		if ($this->queueCounter >= 2) {
+		if ($this->queueSize >= 2) {
 			$this->matchup();
 		}
 	}
@@ -84,11 +84,11 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 
 	public function nextPlayer() {
 		// We keep dequeueing until an active player is found
-		while ($this->queueCounter > 0) {
+		while ($this->queueSize > 0) {
 			$client = $this->queue->dequeue();
-			$this->queueCounter--;
+			$this->queueSize--;
 
-			if(time() - $client->timestamp > 10){
+			if(time() - $client->timestamp > 120){
 				$this->cleanInactive($client);
 				return;
 			}
@@ -137,26 +137,19 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 
 		// Send a match found message to the players
 		// This will ask them for confirmation to join a game room
-		$response = json_encode(array(
+		$response = json_encode([
 			'type' => 'match_found',
 			'room_id' => $room_id,
 			'player1' => $player1->username,
 			'player2' => $player2->username,
-		));
+		]);
 
 		$player1->send($response);
 		$player2->send($response);
 	}
 
 	public function getOpponent(Ratchet\ConnectionInterface $from){
-		// Get the room from its ID stored in the connection object
-		//$player1 = $this->rooms[$from->roomId]->player1;
-		//if ($from == $player1) {
-		//    return $this->rooms[$from->roomId]->player2;
-		//}
-		//return $player1;
 		if(!isset($from->roomId)){
-			echo "Player ".$from->username." is not yet in a room\n";
 			return;
 		}
 		$room = $this->rooms[$from->roomId];
@@ -166,13 +159,36 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 		return $room->getPlayer1();
 	}
 
+	private function get_result_from_database($room_id, $from){
+		$username = $from->username;
+
+		$sql = "SELECT * FROM rooms WHERE id = '$room_id'";
+		$row = $this->db->query($sql)->fetch_assoc();
+
+		if($row["player1"] != $username && $row["player2"] != $username && !$this->isAdmin($from)){
+			// Forbidden room for current user
+			// 4002 (Forbidden Room)
+			$from->close(4002);
+		}
+		if(isset($row["winner"])){
+			return [
+				'type' => 'finished_game',
+				'boardMarkings' => $row["board_markings"],
+				'winner' => $row["winner"],
+			];
+		}
+		return [
+			"type" => "room_data",
+			"player1" => $row["player1"],
+			"player2" => $row["player2"],
+			'boardMarkings' => $row["board_markings"],
+		];
+	}
 	public function isAdmin($from){
 		if($from->username == "alice") return true;
 	}
 
 	public function onMessage(Ratchet\ConnectionInterface $from, $msg) {
-		//print_r($msg);
-		//echo "\n";
 		$payload = json_decode($msg, true);
 		$type = $payload['type'];
 
@@ -186,22 +202,29 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 			$from->timestamp = time();
 			break;
 		case 'confirm':
-			$from->state = "confirmed";
-
 			// Get opponent connection
 			$opponent = $this->getOpponent($from);
 
-			$response = json_encode(array(
+			if(empty($opponent)){
+				// Cannot confirm without an opponent set
+				// 4003 (Invalid WS Message)
+				$from->close(4003);
+				return;
+			}
+
+			$from->state = "confirmed";
+
+			$response = json_encode([
 				'type' => 'opponent_confirmed',
-			));
+			]);
 			$opponent->send($response);
 
 			if($opponent->state !== "confirmed") break;
 
 			// Both players have confirmed, move them to the game room
-			$response = json_encode(array(
+			$response = json_encode([
 				'type' => 'game_start',
-			));
+			]);
 			$from->send($response);
 			$opponent->send($response);
 			break;
@@ -214,57 +237,60 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 
 			$room = $this->rooms[$room_id] ?? null;
 			if(empty($room)){
+				if(!isset($room_id)) {
+					$from->close(4002);
+					break;
+				}
+				$response = $this->get_result_from_database($room_id, $from);
+				$from->send(json_encode($response));
+				break;
+			}
+			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
 				// Forbidden room for current user
 				// 4002 (Forbidden Room)
 				$from->close(4002);
-				return;
-			}
-			if(!$room->isInRoom($from) && !$this->isAdmin($from)){
-				$from->send(
-					json_encode("Access denied! You aren't in this room.")
-				);
 				break;
 			}
 			if($room->isInRoom($from)){
 				$room->updatePlayerConnection($from);
 			}
 
-			$response = array(
-				"username1" => $room->getPlayer1()->username,
-				"username2" => $room->getPlayer2()->username,
+			$response = [
+				"type" => "room_data",
+				"player1" => $room->getPlayer1()->username,
+				"player2" => $room->getPlayer2()->username,
 				"boardMarkings" => $room->getBoard(),
 				"turn" => $room->getTurn(),
 				"xPlayerNumber" => $room->getXPlayerNumber(),
-				"type" => "room_data",
-			);
+			];
 			$from->send(json_encode($response));
 			break;
 
 		case "move":
 			$room_id = $from->roomId;
-			$room = $this->rooms[$room_id];
+			$room = $this->rooms[$room_id] ?? null;
 			$move = $payload["tile"];
 
-			if($room->gameOver()){
-				$from->send(json_encode(array(
+			if($room == null || $room->gameOver()){
+				$from->send(json_encode([
 					"type" => "game_over",
-				)));
+				]));
 				return;
 			}
 			if(!$room->checkAvailability($move)){
-				$from->send(json_encode(array(
+				$from->send(json_encode([
 					"type" => "invalid_move",
 					"move" => $move,
-				)));
+				]));
 				break;
 			}
 			$curr_player = $room->getCurrentPlayer();
 
 			if($curr_player != $from) {
-				$from->send(json_encode(array(
+				$from->send(json_encode([
 					"type" => "not_your_turn",
 					"move" => $move,
-				)));
+				]));
 				break;
 			}
 			$room->nextMove($move);
@@ -272,14 +298,14 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 			$winner = $room->getWinner();
 
 			if($winner != "_" && $winner != null){
-				$message = array(
+				$message = [
 					'type' => 'game_end',
 					'lastMove' => $move,
 					'moveSymbol' => $winner,
 					'turn' => $room->getTurn(),
-					'board' => $updated_board,
+					'boardMarkings' => $updated_board,
 					'winner' => $curr_player->username,
-				);
+				];
 				$sql = "UPDATE rooms SET winner = '$curr_player->username', board_markings = '$updated_board' WHERE id = '$room_id'";
 				$this->db->query($sql);
 				$room->getPlayer1()->send(json_encode($message));
@@ -290,23 +316,23 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 			$this->db->query($sql);
 
 			if($room->getTurn() == 10){
-				$message = array(
+				$message = [
 					'type' => 'game_end',
 					'lastMove' => $move,
 					'moveSymbol' => $room->getCurrentSymbol(),
-					'board' => $updated_board,
-				);
+					'boardMarkings' => $updated_board,
+				];
 				$room->getPlayer1()->send(json_encode($message));
 				$room->getPlayer2()->send(json_encode($message));
 				break;
 			}
-			$message = array(
+			$message = [
 				'type' => 'room_update',
 				'lastMove' => $move,
 				'moveSymbol' => $room->getCurrentSymbol(),
 				'turn' => $room->getTurn(),
-				'board' => $updated_board,
-			);
+				'boardMarkings' => $updated_board,
+			];
 			$room->getPlayer1()->send(json_encode($message));
 			$room->getPlayer2()->send(json_encode($message));
 		}
@@ -318,19 +344,19 @@ class GameWsServer implements Ratchet\MessageComponentInterface {
 }
 
 $ws_handler = new \Ratchet\Http\HttpServer(
-    new \Ratchet\WebSocket\WsServer(
-        new GameWsServer()
-    )
+	new \Ratchet\WebSocket\WsServer(
+		new GameWsServer()
+	)
 );
 
 $loop = \React\EventLoop\Loop::get();
 
 $secure_websockets = new \React\Socket\SocketServer('127.0.0.1:8080', $context=array(), $loop);
 $secure_websockets = new \React\Socket\SecureServer($secure_websockets, $loop, [
-    'local_cert' => 'public.pem',
+	'local_cert' => 'public.pem',
 	'local_pk' => 'private.pem',
 	'allow_self_signed' => TRUE, // Allow self signed certs (should be false in production)
-    'verify_peer' => FALSE
+	'verify_peer' => FALSE
 ]);
 
 $secure_websockets_server =

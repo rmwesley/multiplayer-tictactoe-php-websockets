@@ -1,46 +1,54 @@
+// Global DOM elements
+var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn, joinModalElement, inactivityModalElement;
 // Global variables
-var playBtn, cancelBtn, waitingRoom, profileBtn, confirmBtn, pressedPlay;
+var pressedPlay;
 
 window.onload = () => {
 	startChatBox();
-	playBtn = $("#play-btn");
-	cancelBtn = $("#cancel-btn");
-	waitingRoom = $("#waiting-room");
-	confirmBtn = $("#confirm-match-btn");
+
+	playBtn = document.querySelector("#play-btn");
+	cancelBtn = document.querySelector("#cancel-btn");
+	waitingRoom = document.querySelector("#waiting-room");
+	confirmBtn = document.querySelector("#confirm-match-btn");
+
+	inactivityModalElement = document.querySelector('#inactive-modal');
+	joinModalElement = document.querySelector('#join-modal');
 	pressedPlay = false;
 
-	//$(document).ready(function(){
-	//	$(this).click(function() {
-	//	   var activeElement = document.activeElement;
-	//	   console.log(activeElement.tagName, activeElement.type || 'N/A');
-	//	 });
-	//   });
+	joinModalElement.addEventListener('hidden.bs.modal', function () {
+		cancel();
+		clearTicks();
+	});
 
-	// Enter is equivalent to click on Play/Confirm
-	$(document).keyup((event) => {
-		var activeElement = document.activeElement;
-		if(activeElement.querySelector('#play-btn') === null) return;
-		if(activeElement.querySelector('#cancel-btn') === null) return;
-		if (event.keyCode == 13) {
-			if(pressedPlay){
-				cancelBtn.children().first().click();
-			}
-			else playBtn.children().first().click();
+	// Enter is equivalent to click on Play/Cancel
+	document.querySelector(".infobox").addEventListener("click", (event) =>{
+		if(!pressedPlay){
+			playBtn.querySelector("button").focus();
+		}
+		else{
+			cancelBtn.querySelector("button").focus();
 		}
 	});
+	joinModalElement.addEventListener('shown.bs.modal', function () {
+		confirmBtn.focus();
+	});
+	joinModalElement.addEventListener("click", (event) => {
+		event.stopPropagation();
+		confirmBtn.focus();
+	})
 }
 
 function showWaitingRoom(){
-	waitingRoom.removeClass("invisible").addClass("visible");
-	cancelBtn.removeClass("d-none").addClass("d-inline");
-	playBtn.removeClass("d-inline").addClass("d-none");
+	waitingRoom.classList.replace("invisible", "visible");
+	cancelBtn.classList.replace("d-none", "d-inline");
+	playBtn.classList.replace("d-inline", "d-none");
 	pressedPlay = true;
 }
 
 function hideWaitingRoom(){
-	waitingRoom.removeClass("visible").addClass("invisible");
-	cancelBtn.removeClass("d-inline").addClass("d-none");
-	playBtn.removeClass("d-none").addClass("d-inline");
+	waitingRoom.classList.replace("visible", "invisible");
+	cancelBtn.classList.replace("d-inline", "d-none");
+	playBtn.classList.replace("d-none", "d-inline");
 	pressedPlay = false;
 }
 
@@ -51,25 +59,12 @@ function play(){
 
 function cancel(){
 	hideWaitingRoom();
-	ws.close();
+	waitingRoomWs.close();
 }
 
-$('#join-modal').on('hidden.bs.modal', function () {
-	cancel();
-	$(".tick").each(function(){
-		$(this).empty()
+function clearTicks(){
+	document.querySelectorAll(".tick").forEach((element) => {
+		element.innerHTML = "";
 	});
-	$("#confirm-match-button").prop("disabled", false);
-});
-
-function confirmMatch(){
-	window.player.parent().after("<span class='col-1 tick'>✓</span>");
-	// Disable button
-	$("#confirm-match-button").prop("disabled", true);
-
-	// Send confirmation message to server
-	var message = {
-		type: "confirm",
-	};
-	ws.send(JSON.stringify(message));
+	confirmBtn.classList.replace("disabled", false);
 }

@@ -10,18 +10,18 @@ function generate_token_pair(): array {
 }
 
 function insert_guest_token(string $selector, string $hashed_validator, string $expiry): bool {
-    global $conn;
+    global $db_conn;
     $sql = 'INSERT INTO guest_tokens(selector, hashed_validator, expiry)
             VALUES(?, ?, ?)';
 
-    $statement = $conn->prepare($sql);
+    $statement = $db_conn->prepare($sql);
     $statement->bind_param('sss', $selector, $hashed_validator, $expiry);
 
     return $statement->execute();
 }
 
 function add_new_guest(int $day = 30) {
-    global $conn;
+    global $db_conn;
     [$selector, $validator] = generate_token_pair();
 
     $token = $selector . ':' . $validator;
@@ -36,19 +36,19 @@ function add_new_guest(int $day = 30) {
     // Insert the token in the database
     if (insert_guest_token($selector, $hashed_validator, $expiry)) {
         setcookie('remember_guest', $token, $expired_seconds);
-        return $conn->insert_id;
+        return $db_conn->insert_id;
     }
 }
 
 function find_guest_token_by_selector(string $selector):array{
-    global $conn;
+    global $db_conn;
     $sql = 'SELECT id, selector, hashed_validator, expiry
                 FROM guest_tokens
                 WHERE selector = ? AND
                     expiry >= now()
                 LIMIT 1';
 
-    $statement = $conn->prepare($sql);
+    $statement = $db_conn->prepare($sql);
     // Bind selector, a string paramater
     $statement->bind_param('s', $selector);
 

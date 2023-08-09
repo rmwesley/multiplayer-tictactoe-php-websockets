@@ -6,18 +6,29 @@ const url = new URL(window.location.href);
 // Extract the values of room_id, player1 and player2 from the URL
 const room_id = url.searchParams.get("room_id");
 
+// Global DOM elements
+var board, messageBox;
+
+// Global variables
+var player1, player2, boardMarkings, playerNumber, turn, symbol, opponent;
+var gameSocket;
+
 window.onload = () => {
 	startChatBox();
-	window.board = document.getElementById("board");
-	window.messageBox = document.getElementById("message-box");
-	board.addEventListener("click", mark)
+	board = document.getElementById("board");
+	messageBox = document.getElementById("message-box");
+
+	// Board input as event listeners
+	board.addEventListener("click", clickMark);
+	document.body.addEventListener("keyup", keyMark);
+
 	if(room_id === undefined){
 		invalidRoom();
 	}
 }
 
-window.socket = new WebSocket("wss://localhost:8080");
-window.socket.onopen = function () {
+gameSocket = new WebSocket("wss://localhost:8080");
+gameSocket.onopen = function () {
 	// Send message to recover match data
 	userIdentityPromise.then((data) => {
 		message = {
@@ -26,141 +37,167 @@ window.socket.onopen = function () {
 			username: data.username,
 			guestUser: data.guestUser
 		};
-		window.socket.send(JSON.stringify(message));
+		gameSocket.send(JSON.stringify(message));
 	});
 }
-window.socket.onerror = function () {
+gameSocket.onerror = function () {
 	console.log("WebSocket error.");
 };
-window.socket.onmessage = (event) => {
+gameSocket.onmessage = (event) => {
 	message = JSON.parse(event.data);
 	if(message.type == "room_data"){
-		console.log(message);
-		window.username1 = message.username1;
-		window.username2 = message.username2;
-		window.boardMarkings = message.boardMarkings;
+		player1 = message.player1;
+		player2 = message.player2;
+		boardMarkings = message.boardMarkings;
+		turn = message.turn;
 
-		window.playerNumber = userIdentityPromise.then((data) => {
-			username = data.username;
-			if(window.username1 == username){
-				return 1;
-			}
-			return 2;
-		});
-		window.playerNumber.then(()=>{
-			window.messageBox.querySelector(".waiting")
-				.classList.add("d-none");
-		})
-		updateMessageBox();
+		setupBoard();
 
-		for(let i = 0; i < window.boardMarkings.length; i++){
-			let symbol = window.boardMarkings.charAt(i);
-			if(symbol == "_") continue;
-			document.getElementById(i).classList.add(symbol, "disabled");
-		}
-		window.turn = message.turn;
+		// Determining player order
+		setPlayerNumber();
 
 		// Storing player symbol
-		userIdentityPromise.then((data) => {
-			username = data.username;
-			if (window.username1 == username) {
-				window.symbol = message.mark1;
-				window.opponent = window.username2;
-			}
-			else {
-				window.opponent = username1;
-				window.symbol = message.mark2;
-			}
-		});
+		setPlayerSymbol();
+
+		// Showing turn information
+		updateTurnMessageBox();
 	}
 	if(message.type == "room_update"){
-		console.log(message);
-		updateMessageBox();
-
-		window.boardMarkings = message.boardMarkings;
-		window.turn = message.turn;
-
+		boardMarkings = message.boardMarkings;
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
-		console.log(tile);
+
+		turn = message.turn;
+		updateTurnMessageBox();
 	}
-	if(message.type == "invalid_move"){
-		console.log(message);
+	if(message.type == "invalid_move" || message.type == "not_your_turn"){
 		document.getElementById(message.move)
-			.classList.remove(window.symbol);
-	}
-	if(message.type == "opponent_turn"){
-		console.log(message);
-		document.getElementById(message.move)
-			.classList.remove("disabled", window.symbol);
+			.classList.remove("disabled", symbol);
 	}
 	if(message.type == "game_end"){
-		console.log(message);
-		window.boardMarkings = message.boardMarkings;
-		window.turn = message.turn;
+		boardMarkings = message.boardMarkings;
+		turn = message.turn;
+		setupBoard();
 
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
 
-		window.board.querySelectorAll('tile').forEach((tile) => {
-			tile.classList.add("disabled");
-		});
+		showResult();
+	}
+	if(message.type == "finished_game"){
+		setPlayerNumber();
 
-		userIdentityPromise.then((data) => {
-			username = data.username;
-			if (message.winner == null){
-				document.getElementById("tie-message-box")
-					.classList.remove("d-none");
-			}
-			else if (message.winner == username){
-				document.getElementById("win-message-box")
-					.classList.remove("d-none");
-			}
-			else{
-				document.getElementById("lose-message-box")
-					.classList.remove("d-none");
-			}
-		});
+		boardMarkings = message.boardMarkings;
+		setupBoard();
+
+		updateTurnMessageBox();
 	}
 }
 
-window.socket.onclose = (event) => {
-	console.log('WebSocket closed with code:', event.code);
-	console.log('Close reason:', event.reason);
-
+gameSocket.onclose = (event) => {
 	if(event.code == 4002){
-		console.log("Forbiden Room")
 		invalidRoom();
 	}
 };
 
-function updateMessageBox(){
-	window.playerNumber.then((playerNumber) => {
-		if(window.turn % 2 == playerNumber % 2){
-			window.messageBox.querySelector(".players-turn")
+function setupBoard(){
+	for(let i = 0; i < boardMarkings.length; i++){
+		let symbol = boardMarkings.charAt(i);
+		if(symbol == "_") continue;
+		document.getElementById(i).classList.add(symbol, "disabled");
+	}
+}
+
+function updateTurnMessageBox(){
+	if(playerNumber == null) return;
+	if(turn % 2 == playerNumber % 2){
+		messageBox.querySelector(".players-turn")
+			.classList.remove("d-none");
+		messageBox.querySelector(".opponents-turn")
+			.classList.add("d-none");
+	}
+	else{
+		messageBox.querySelector(".players-turn")
+			.classList.add("d-none");
+		messageBox.querySelector(".opponents-turn")
+			.classList.remove("d-none");
+	}
+}
+
+function showResult(){
+	userIdentityPromise.then((data) => {
+		username = data.username;
+		if (username != player1 && username != player2){
+			return;
+		}
+		if (message.winner == null){
+			document.getElementById("tie-message-box")
 				.classList.remove("d-none");
-			window.messageBox.querySelector(".opponents-turn")
-				.classList.add("d-none");
+		}
+		else if (message.winner == username){
+			document.getElementById("win-message-box")
+				.classList.remove("d-none");
 		}
 		else{
-			window.messageBox.querySelector(".players-turn")
-				.classList.add("d-none");
-			window.messageBox.querySelector(".opponents-turn")
+			document.getElementById("lose-message-box")
 				.classList.remove("d-none");
 		}
 	});
 }
 
-function mark(event){
+function setPlayerNumber() {
+	userIdentityPromise.then((data) => {
+		messageBox.querySelector(".waiting")
+			.classList.add("d-none");
+		username = data.username;
+		// Non-playing user
+		if(!userInRoom(username)){
+			playerNumber = null;
+			return;
+		}
+		if(player1 == username){
+			playerNumber = 1;
+		}
+		else {
+			playerNumber = 2;
+		}
+	});
+}
+
+function setPlayerSymbol(){
+	userIdentityPromise.then((data) => {
+		username = data.username;
+		if (player1 == username) {
+			symbol = message.mark1;
+			opponent = player2;
+		}
+		else {
+			opponent = player1;
+			symbol = message.mark2;
+		}
+	});
+}
+
+function clickMark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
-	window.socket.send(JSON.stringify({type: "move", tile: event.target.id}));
+	gameSocket.send(JSON.stringify({type: "move", tile: event.target.id}));
+}
+
+function keyMark(event){
+	if(event.key < '1') return;
+	if(event.key > '9') return;
+	document.getElementById(event.key-1).click();
+}
+
+function userInRoom(user){
+	return (player1 == user || player2 == user);
 }
 
 function invalidRoom(){
-	window.messageBox.querySelector(".waiting")
+	messageBox.querySelector(".waiting")
 		.classList.add("d-none");
-	window.messageBox.querySelector(".invalid")
+	messageBox.querySelector(".invalid")
 		.classList.remove("d-none");
-	window.board.classList.add("d-none");
+	board.classList.add("d-none");
 }

@@ -3,7 +3,7 @@ function sendPing() {
 	if(!pressedPlay || document.visibilityState !== "visible") return; 
 
 	// Ping the server to keep connection alive
-	window.ws.send(JSON.stringify({ type: "ping"}));
+	waitingRoomWs.send(JSON.stringify({ type: "ping"}));
 }
 
 setInterval(() => {

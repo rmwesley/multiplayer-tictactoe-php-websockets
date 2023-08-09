@@ -29,6 +29,7 @@ function generate_history_table($history_data){
 	  <th scope='col'>Second</th>
 	  <th scope='col'>Final Board</th>
 	  <th scope='col'>Winner</th>
+	  <th scope='col'>Link</th>
 	</tr>
   </thead>
   <tbody>
@@ -47,7 +48,7 @@ $username = $_SESSION['username'];
 
 if($username == 'alice'){
 	$sql = "SELECT * FROM rooms";
-	$result = $conn->query($sql);
+	$result = $db_conn->query($sql);
 	// MYSQLI_ASSOC keeps the column names as keys in the arrays
 	$history_data = $result->fetch_all(MYSQLI_ASSOC);
 
@@ -57,7 +58,7 @@ if($username == 'alice'){
 
 // Prepare and execute the query using prepared statements
 $sql = "SELECT * FROM rooms WHERE player1 = ? OR player2 = ?";
-$statement = $conn->prepare($sql);
+$statement = $db_conn->prepare($sql);
 
 // Bind username, a string paramater
 $statement->bind_param('ss', $username, $username);

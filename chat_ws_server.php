@@ -44,15 +44,33 @@ class ChatServer implements Ratchet\MessageComponentInterface {
 		case 'join':
 			// A new client joined, so we store its username
 			$from->username = $payload['username'];
+
+			$history = $this->chat->sortedMessages();
+			$from->send(json_encode([
+				"type" => "history",
+				"history" => $history,
+			]));
 			break;
 		case 'message':
-			$this->chat->addMessage($payload['content']);
+			$time = time();
+			$this->chat->addMessage($from->username, $payload['content'], $time);
+
 			foreach($this->connections as $conn) {
 				$conn->send(json_encode([
+					"type" => "new_message",
 					"source" => $from->username,
 					"content" => $payload['content'],
-					"time" => time(),
+					"time" => $time,
 				]));
+			}
+			if($this->chat->isFull()){
+				global $db_conn;
+				foreach($this->chat->sortedMessages() as $message){
+					$sql = "INSERT INTO messages(username, message, time) VALUES (?,?,?)";
+					$statement = $db_conn->prepare($sql);
+					$statement->bind_param('ssi', $message[0], $message[1], $message[2]);
+					$statement->execute();
+				}
 			}
 			break;
 		}
