@@ -58,13 +58,9 @@ gameSocket.onmessage = (event) => {
 			messageBox.querySelector(".waiting")
 				.classList.add("d-none");
 		})
+		updateBoard();
 		updateMessageBox();
 
-		for(let i = 0; i < boardMarkings.length; i++){
-			let symbol = boardMarkings.charAt(i);
-			if(symbol == "_") continue;
-			document.getElementById(i).classList.add(symbol, "disabled");
-		}
 		turn = message.turn;
 
 		// Storing player symbol
@@ -82,21 +78,15 @@ gameSocket.onmessage = (event) => {
 	}
 	if(message.type == "room_update"){
 		console.log(message);
-		updateMessageBox();
 
 		boardMarkings = message.boardMarkings;
-		turn = message.turn;
-
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
-		console.log(tile);
+
+		turn = message.turn;
+		updateMessageBox();
 	}
-	if(message.type == "invalid_move"){
-		console.log(message);
-		document.getElementById(message.move)
-			.classList.remove(symbol);
-	}
-	if(message.type == "opponent_turn"){
+	if(message.type == "invalid_move" || message.type == "not_your_turn"){
 		console.log(message);
 		document.getElementById(message.move)
 			.classList.remove("disabled", symbol);
@@ -109,26 +99,8 @@ gameSocket.onmessage = (event) => {
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
 
-		board.querySelectorAll('tile').forEach((tile) => {
-			tile.classList.add("disabled");
-		});
-
-		userIdentityPromise.then((data) => {
-			username = data.username;
-			if (message.winner == null){
-				document.getElementById("tie-message-box")
-					.classList.remove("d-none");
-			}
-			else if (message.winner == username){
-				document.getElementById("win-message-box")
-					.classList.remove("d-none");
-			}
-			else{
-				document.getElementById("lose-message-box")
-					.classList.remove("d-none");
-			}
-		});
-	}
+		showResult();
+	};
 }
 
 gameSocket.onclose = (event) => {
@@ -141,9 +113,18 @@ gameSocket.onclose = (event) => {
 	}
 };
 
+function updateBoard(){
+	for(let i = 0; i < boardMarkings.length; i++){
+		let symbol = boardMarkings.charAt(i);
+		if(symbol == "_") continue;
+		document.getElementById(i).classList.add(symbol, "disabled");
+	}
+}
+
 function updateMessageBox(){
-	playerNumber.then((playerNumber) => {
-		if(turn % 2 == playerNumber % 2){
+	playerNumber.then((number) => {
+		if(number == null) return;
+		if(turn % 2 == number % 2){
 			messageBox.querySelector(".players-turn")
 				.classList.remove("d-none");
 			messageBox.querySelector(".opponents-turn")
@@ -157,13 +138,50 @@ function updateMessageBox(){
 		}
 	});
 }
+function showResult(){
+	userIdentityPromise.then((data) => {
+		username = data.username;
+		if (username != player1 && username != player2){
+			return;
+		}
+		if (message.winner == null){
+			document.getElementById("tie-message-box")
+				.classList.remove("d-none");
+		}
+		else if (message.winner == username){
+			document.getElementById("win-message-box")
+				.classList.remove("d-none");
+		}
+		else{
+			document.getElementById("lose-message-box")
+				.classList.remove("d-none");
+		}
+	});
+}
 
+function setPlayerNumber() {
+	playerNumber = userIdentityPromise.then((data) => {
+		messageBox.querySelector(".waiting")
+			.classList.add("d-none");
+		username = data.username;
+		// Non-playing user
+		if(!userInRoom(username)){
+			return null;
+		}
+		if(player1 == username){
+			return 1;
+		}
+		return 2;
+	});
+}
 function mark(event){
 	if(!event.target.classList.contains("tile")) return;
 	if(event.target.classList.contains("disabled")) return;
 	gameSocket.send(JSON.stringify({type: "move", tile: event.target.id}));
 }
-
+function userInRoom(user){
+	return (player1 == user || player2 == user);
+}
 function invalidRoom(){
 	messageBox.querySelector(".waiting")
 		.classList.add("d-none");
