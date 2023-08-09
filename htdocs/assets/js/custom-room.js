@@ -44,8 +44,6 @@ window.socket.onmessage = (event) => {
 	});
 	message = JSON.parse(event.data);
 	if(message.type == "room_data"){
-		console.log(message);
-
 		window.boardMarkings = message.boardMarkings;
 		for(let tileIndex = 0; tileIndex < window.boardMarkings.length; tileIndex++){
 			let symbol = window.boardMarkings.charAt(tileIndex);
@@ -77,7 +75,6 @@ window.socket.onmessage = (event) => {
 		});
 	}
 	if(message.type == "room_update"){
-		console.log(message);
 		window.boardMarkings = message.boardMarkings;
 		window.turn = message.turn;
 
@@ -85,17 +82,14 @@ window.socket.onmessage = (event) => {
 		saveMove(message.lastMove, message.moveSymbol)
 	}
 	if(message.type == "invalid_move"){
-		console.log(message);
 		document.getElementById(message.move)
 			.classList.remove(window.symbol);
 	}
 	if(message.type == "not_your_turn"){
-		console.log(message);
 		document.getElementById(message.move)
 			.classList.remove("disabled", window.symbol);
 	}
 	if(message.type == "game_end"){
-		console.log(message);
 		window.boardMarkings = message.boardMarkings;
 		window.turn = message.turn;
 

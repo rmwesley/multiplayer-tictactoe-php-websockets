@@ -26,7 +26,6 @@ function clientWebSocketInit() {
 			inactivityModal.show();
 
 			hideWaitingRoom();
-			//console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
 		}
 		setTimeout(300, hideWaitingRoom);
 	};
@@ -34,7 +33,6 @@ function clientWebSocketInit() {
 	waitingRoomWs.onmessage = (event) => {
 		message = JSON.parse(event.data);
 		// Match found
-		console.log(message);
 		if(message.type === 'match_found') {
 			joinModal = new bootstrap.Modal(joinModalElement);
 			joinModal.show();

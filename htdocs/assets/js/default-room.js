@@ -46,7 +46,6 @@ gameSocket.onerror = function () {
 gameSocket.onmessage = (event) => {
 	message = JSON.parse(event.data);
 	if(message.type == "room_data"){
-		console.log(message);
 		player1 = message.player1;
 		player2 = message.player2;
 		boardMarkings = message.boardMarkings;
@@ -64,8 +63,6 @@ gameSocket.onmessage = (event) => {
 		updateTurnMessageBox();
 	}
 	if(message.type == "room_update"){
-		console.log(message);
-
 		boardMarkings = message.boardMarkings;
 		tile = document.getElementById(message.lastMove);
 		tile.classList.add("disabled", message.moveSymbol)
@@ -74,12 +71,10 @@ gameSocket.onmessage = (event) => {
 		updateTurnMessageBox();
 	}
 	if(message.type == "invalid_move" || message.type == "not_your_turn"){
-		console.log(message);
 		document.getElementById(message.move)
 			.classList.remove("disabled", symbol);
 	}
 	if(message.type == "game_end"){
-		console.log(message);
 		boardMarkings = message.boardMarkings;
 		turn = message.turn;
 		setupBoard();
@@ -100,11 +95,7 @@ gameSocket.onmessage = (event) => {
 }
 
 gameSocket.onclose = (event) => {
-	console.log('WebSocket closed with code:', event.code);
-	console.log('Close reason:', event.reason);
-
 	if(event.code == 4002){
-		console.log("Forbiden Room")
 		invalidRoom();
 	}
 };
