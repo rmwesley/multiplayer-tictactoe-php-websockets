@@ -11,13 +11,23 @@
     <script src="assets/js/color-modes.js"></script>
     <script src="assets/js/chatbox.js"></script>
     <script src="assets/js/history.js"></script>
-</head>
-	<body>
-			<button type="button" class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#matchHistory" aria-expanded="true">
-				Game history
-			</button>
-			<div class="collapse show" id='matchHistory' aria-expanded="true">
-				{{game_history}}
-			</div>
-	</body>
+  </head>
+  <body>
+    <div class="accordion" id="historyAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#history" aria-expanded="true" aria-controls="collapseOne">
+						TicTacToe matches
+          </button>
+        </h2>
+        <div id="history" class="accordion-collapse collapse show" data-bs-parent="#historyAccordion">
+          <div class="accordion-body">
+            <div class="collapse show" id='matchHistory' aria-expanded="true">
+              {{game_history}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
