@@ -1,5 +1,5 @@
 // Global DOM elements
-var playerElement, opponentElement, joinModal, inactivityModal;
+var playerElement, opponentElement;
 // Global variables
 var room_id;
 var waitingRoomWs;
@@ -22,7 +22,9 @@ function clientWebSocketInit() {
 		// User was inactive and was removed from match queue
 		if(event.code == 4001){
 			// Showing inactivity popup message
-			inactivityModal.modal('show');
+			inactivityModal = new bootstrap.Modal(inactivityModalElement);
+			inactivityModal.show();
+
 			hideWaitingRoom();
 			//console.log("Connection closed due to inactivity. The player didn't send a ping/heartbeat message on the expected time frame")
 		}
@@ -32,33 +34,36 @@ function clientWebSocketInit() {
 	waitingRoomWs.onmessage = (event) => {
 		message = JSON.parse(event.data);
 		// Match found
+		console.log(message);
 		if(message.type === 'match_found') {
-			joinModal.find('#player1').text(message.player1);
-			joinModal.find('#player2').text(message.player2);
-			joinModal.find('.modal-title').text("Join Room " + message.room_id);
+			joinModal = new bootstrap.Modal(joinModalElement);
+			joinModal.show();
+
+			joinModalElement.querySelector('#player1').innerHTML = message.player1;
+			joinModalElement.querySelector('#player2').innerHTML = message.player2;
+			joinModalElement.querySelector('.modal-title').innerHTML = "Join Room " + message.room_id;
 			room_id = message.room_id;
 
-			joinModal.modal('show');
 			userIdentityPromise.then((data) => {
 				username = data.username;
-				if(joinModal.find('#player1').text() == username) {
-					playerElement = joinModal.find('#player1');
-					opponentElement = joinModal.find('#player2');
+				if(joinModalElement.querySelector('#player1').innerHTML == username) {
+					playerElement = joinModalElement.querySelector('#player1');
+					opponentElement = joinModalElement.querySelector('#player2');
 				}
 				else{
-					playerElement = joinModal.find('#player2');
-					opponentElement = joinModal.find('#player1');
+					playerElement = joinModalElement.querySelector('#player2');
+					opponentElement = joinModalElement.querySelector('#player1');
 				}
 			});
 		}
 		else if(message.type === "opponent_confirmed") {
 			// Update UI to show opponent confirmed
-			opponentElement.parent().parent().find(".tick").text("✓");
+			opponentElement.parentNode.parentNode.querySelector(".tick").innerHTML = "✓";
 		}
 		else if(message.type === "opponent_disconnected"){
 			// Update UI to show opponent disconnected
-			opponentElement.parent().parent().find(".tick").text("✕");
-			confirmBtn.prop("disabled", true);
+			opponentElement.parentNode.parentNode.querySelector(".tick").innerHTML = "✕";
+			confirmBtn.classList.replace("disabled", true);
 			cancel();
 		}
 		else if(message.type === "game_start"){
@@ -66,4 +71,16 @@ function clientWebSocketInit() {
 			window.location.href = "index.php?page=game&room_id=" + room_id;
 		}
 	}
+}
+
+function confirmMatch(){
+	playerElement.parentNode.parentNode.querySelector(".tick").innerHTML = "✓";
+	// Disable button
+	confirmBtn.classList.replace("disabled", true);
+
+	// Send confirmation message to server
+	var message = {
+		type: "confirm",
+	};
+	waitingRoomWs.send(JSON.stringify(message));
 }
