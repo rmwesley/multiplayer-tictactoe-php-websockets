@@ -52,6 +52,7 @@ class MessageArea {
 
 function startChatBox() {
 	chatbox = document.getElementById("chatbox");
+	messagesElement = chatbox.querySelector(".messages");
 	messageArea = new MessageArea(chatbox.querySelector(".messages"));
 	typingInputField = chatbox.querySelector(".write_msg");
 	sendBtn = chatbox.querySelector(".msg_send_btn");
@@ -85,6 +86,7 @@ function startChatBox() {
 				messageArea.addMessage(chat_msg[0], chat_msg[1], dateString);
 			});
 		}
+		messagesElement.scrollTo(0, messagesElement.scrollHeight);
 	}
 
 	function sendMessage(){
@@ -162,4 +164,3 @@ function draggableChatBox(chatbox, header) {
 		document.removeEventListener("touchmove", elementDragTouch);
 	}
 }
-
