@@ -51,6 +51,9 @@ case 'history':
 	include_once "api/content_history.php";
 	$html = str_replace("{{game_history}}", $match_history_table, $html);
 	break;
+case 'about':
+	$html = file_get_contents("views/about-page.html");
+	break;
 default:
 	$html = file_get_contents("views/lobby.html");
 	break;
