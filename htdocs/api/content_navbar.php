@@ -66,6 +66,21 @@ HERE;
 $authAccordion = str_replace("{{login_form}}", $loginForm, $authAccordion);
 $authAccordion = str_replace("{{register_form}}", $registerForm, $authAccordion);
 
+// Logout button is not set by default, only if user is logged in
+$logoutButton = "";
+
+// If user is guest, logout button is unset
+if(!isset($_SESSION['guest_id'])){
+	// Setting up logout button
+	$logoutButton = <<< HERE
+<div class="text-center pt-5">
+  <form action="api/logout.php" method="post" class="btn btn-outline-danger">
+    <input name="Logout" type="submit" value="Logout">
+  </form>
+</div>
+HERE;
+}
+
 // Setup authentication offcanvas
 $authOffcanvas = <<< HERE
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAuth" aria-labelledby="offcanvasAuthLabel">
@@ -75,12 +90,15 @@ $authOffcanvas = <<< HERE
   </div>
   <div class="offcanvas-body">
     {{auth_accordion}}
+    {{logout_button}}
   </div>
 </div>
 HERE;
 
 // Substituting authentication accordion into the offcanvas body
 $authOffcanvas = str_replace("{{auth_accordion}}", $authAccordion, $authOffcanvas);
+// Adding logout button right below authentication accordion
+$authOffcanvas = str_replace("{{logout_button}}", $logoutButton, $authOffcanvas);
 
 // Setting up profile button with username and icon
 $profileButton = <<< HERE
@@ -170,9 +188,7 @@ $navbar = <<< HERE
         </li>
       </ul>
     </div>
-
     {{profile_button}}
-    {{logout_button}}
     {{theme_button}}
   </div>
 </nav>
@@ -184,16 +200,4 @@ $navbar = str_replace("{{auth_offcanvas}}", $authOffcanvas, $navbar);
 $navbar = str_replace("{{profile_button}}", $profileButton, $navbar);
 $navbar = str_replace("{{theme_button}}", $themeButton, $navbar);
 
-$logoutButton = "";
-// If user is guest, logout button is unnecessary
-if(!isset($_SESSION['guest_id'])){
-	// Setting up logout button
-	$logoutButton = <<< HERE
-<form action="api/logout.php" method="post" class="btn btn-outline-danger">
-  <input name="Logout" type="submit" value="Logout">
-</form>
-HERE;
-}
-
-$navbar = str_replace("{{logout_button}}", $logoutButton, $navbar);
 $navbar = $icons . $navbar;
