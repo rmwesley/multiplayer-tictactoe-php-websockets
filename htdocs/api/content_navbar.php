@@ -105,7 +105,7 @@ $themeButton = <<< HERE
     <svg class="bi theme-icon-active" width="1.3rem" height="1.3rem">
       <use href="#moon-stars-fill" fill="currentcolor"></use>
     </svg>
-    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+    <span class="d-none ms-2" id="bd-theme-text">Toggle theme</span>
   </button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
     <li>
