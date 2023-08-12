@@ -81,6 +81,27 @@ if(!isset($_SESSION['guest_id'])){
 HERE;
 }
 
+// Setting up login status message
+$loginStatusMsg = <<< HERE
+<p>Logged in as
+  <span class="text-primary">
+  {{username}}
+  </span>
+  {{guest_user_message}}
+</p>
+HERE;
+
+// Sustitute username into login status message
+$loginStatusMsg = str_replace("{{username}}", $_SESSION['username'], $loginStatusMsg);
+
+// Show whether user is a guest
+if(isset($_SESSION['guest_id'])){
+	$loginStatusMsg = str_replace("{{guest_user_message}}", "(Guest user)", $loginStatusMsg);
+}
+else{
+	$loginStatusMsg = str_replace("{{guest_user_message}}", "", $loginStatusMsg);
+}
+
 // Setup authentication offcanvas
 $authOffcanvas = <<< HERE
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAuth" aria-labelledby="offcanvasAuthLabel">
@@ -89,12 +110,15 @@ $authOffcanvas = <<< HERE
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
+    {{login_status_message}}
     {{auth_accordion}}
     {{logout_button}}
   </div>
 </div>
 HERE;
 
+// Add login status message at top of authentication offcanvas
+$authOffcanvas = str_replace("{{login_status_message}}", $loginStatusMsg, $authOffcanvas);
 // Substituting authentication accordion into the offcanvas body
 $authOffcanvas = str_replace("{{auth_accordion}}", $authAccordion, $authOffcanvas);
 // Adding logout button right below authentication accordion
