@@ -126,9 +126,11 @@ $authOffcanvas = str_replace("{{logout_button}}", $logoutButton, $authOffcanvas)
 
 // Setting up profile button with username and icon
 $profileButton = <<< HERE
-<button id="profile-btn" class="btn btn-outline-primary me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAuth" aria-controls="offcanvasAuth">
+<button id="profile-btn" class="btn btn-outline-primary ms-auto me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAuth" aria-controls="offcanvasAuth">
   {{profile_icon}}
-  {{username}}
+  <span class='d-none d-sm-inline'>
+    {{username}}
+  </span>
 </button>
 HERE;
 
