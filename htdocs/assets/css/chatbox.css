@@ -48,7 +48,7 @@
 	text-align:center;
 }
 
-#chatbox > .messages{
+.messages{
 	height: 25vh;
 	overflow-y: scroll;
 }
@@ -65,7 +65,25 @@
 	padding-right: 5px;
 }
 
-#chatbox .typing_area {
+.message {
+	padding-top:1px;
+	padding-bottom:1px;
+	padding-left:3px;
+	padding-right:3px;
+}
+.date {
+	text-align: center;
+	margin: 0.3rem;
+}
+.date-string {
+	border-radius: 0.4rem;
+	padding: 0.3rem;
+}
+.message > span {
+	padding-left: 5px;
+	padding-left: 5px;
+}
+.typing_area {
 	display: flex;
 	justify-content: center;
 }
@@ -73,17 +91,20 @@
 .chat-msg-username {
 	color: green;
 }
-.chat-msg-username:after {
-	content: ": ";
-}
 .admin-user {
 	color: darkgreen !important;
 }
 .local {
 	color: gray !important;
 }
+.chat-msg-username:after {
+	content: ": ";
+}
 .chat-msg-time {
-	float:right;
+	float: right;
+	color: green;
+	font-size: 12px;
+	top: 2px;
 }
 
 ::-webkit-scrollbar {

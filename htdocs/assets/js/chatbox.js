@@ -1,13 +1,28 @@
 class MessageArea {
 	constructor(element){
 		this.area = element;
+		this.date = null;
 	}
 	checkAdmin(source){
 		return source == "admin" || source == "rmwesley";
 	}
+	addDateDivider() {
+		let date = document.createElement("div");
+		date.classList.add("date");
+
+		let dateText = document.createElement("span");
+		dateText.classList.add("date-string");
+		dateText.classList.add("bg-body-secondary");
+		dateText.innerHTML = this.date;
+
+		date.appendChild(dateText);
+
+		this.area.appendChild(date);
+	}
 
 	addSystemMessage(source, content) {
 		let message = document.createElement("div");
+		message.classList.add("message");
 
 		let messageUsername = document.createElement("span");
 		messageUsername.className = "chat-msg-username";
@@ -25,6 +40,7 @@ class MessageArea {
 	}
 	addMessage(source, content, time) {
 		let message = document.createElement("div");
+		message.classList.add("message");
 
 		let messageUsername = document.createElement("span");
 		messageUsername.className = "chat-msg-username";
@@ -38,10 +54,18 @@ class MessageArea {
 		messageContent.className = "chat-msg-content";
 		messageContent.innerHTML = content;
 
+		let msgDate = new Date(1000 * time);
+
 		let messageTime = document.createElement("span");
 		messageTime.className = "chat-msg-time";
-		messageTime.innerHTML = time;
+		messageTime.innerHTML = msgDate.toLocaleTimeString("pt-BR");
 
+		let dateString = msgDate.getDate() + "/" + (msgDate.getMonth() + 1) + "/" + msgDate.getFullYear();
+
+		if(this.date !== dateString){
+			this.date = dateString;
+			this.addDateDivider();
+		}
 		message.appendChild(messageUsername);
 		message.appendChild(messageContent);
 		message.appendChild(messageTime);
@@ -76,14 +100,12 @@ function startChatBox() {
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
 		if(message.type == "new_message"){
-			dateString = new Date(1000 * message.time).toLocaleTimeString();
-			messageArea.addMessage(message.source, message.content, dateString);
+			messageArea.addMessage(message.source, message.content, message.time);
 		}
 		if(message.type == "history"){
 			message.history.forEach((chat_msg) => {
 				if(chat_msg == null) return;
-				dateString = new Date(1000 * chat_msg[2]).toLocaleTimeString();
-				messageArea.addMessage(chat_msg[0], chat_msg[1], dateString);
+				messageArea.addMessage(chat_msg[0], chat_msg[1], chat_msg[2]);
 			});
 		}
 		messagesElement.scrollTo(0, messagesElement.scrollHeight);
