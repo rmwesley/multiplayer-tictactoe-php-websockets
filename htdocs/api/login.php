@@ -31,7 +31,7 @@ function find_by_username($username){
 }
 
 function log_user_in($username): bool {
-    session_unset();
+    unset($_SESSION['guest_id']);
     // Prevent session fixation attack
     if (session_regenerate_id()) {
         // Set username in the session
