@@ -141,6 +141,9 @@ function draggableChatBox(chatbox, header) {
 		e = e || window.event;
 		e.preventDefault();
 
+		// Only left mouse button can drag
+		if (e.button !== 0) return;
+
 		// Get cursor position
 		initialX = e.clientX;
 		initialY = e.clientY;
