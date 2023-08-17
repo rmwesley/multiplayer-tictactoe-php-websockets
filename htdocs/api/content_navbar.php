@@ -198,10 +198,10 @@ HERE;
 $navbar = <<< HERE
 <nav class='navbar mb-1 navbar-expand-md navbar-dark static-top bg-dark'>
   <div class='container-fluid'>
-    <a class='navbar-brand' href='/'>TicTacToe</a>
     <button class='navbar-toggler border-0 me-auto' type='button' data-bs-toggle='offcanvas' data-bs-target='#tableOfContents' aria-label='TOC'>
       <span class='navbar-toggler-icon'></span>
     </button>
+    <a class='navbar-brand' href='/'>TicTacToe</a>
     {{table_of_contents}}
     {{profile_button}}
     {{theme_button}}
