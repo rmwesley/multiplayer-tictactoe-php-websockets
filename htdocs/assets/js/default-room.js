@@ -22,12 +22,15 @@ window.onload = () => {
 	board.addEventListener("click", clickMark);
 	document.body.addEventListener("keyup", keyMark);
 
-	if(room_id === undefined){
+	if(!room_id){
 		invalidRoom();
+		return;
 	}
+	board.classList.remove("d-none");
 }
 
 gameSocket = new WebSocket("wss://localhost:8080");
+
 gameSocket.onopen = function () {
 	// Send message to recover match data
 	userIdentityPromise.then((data) => {
@@ -199,5 +202,4 @@ function invalidRoom(){
 		.classList.add("d-none");
 	messageBox.querySelector(".invalid")
 		.classList.remove("d-none");
-	board.classList.add("d-none");
 }
