@@ -66,6 +66,42 @@ HERE;
 $authAccordion = str_replace("{{login_form}}", $loginForm, $authAccordion);
 $authAccordion = str_replace("{{register_form}}", $registerForm, $authAccordion);
 
+// Logout button is not set by default, only if user is logged in
+$logoutButton = "";
+
+// If user is guest, logout button is unset
+if(!isset($_SESSION['guest_id'])){
+	// Setting up logout button
+	$logoutButton = <<< HERE
+<div class="text-center pt-5">
+  <form action="api/logout.php" method="post" class="btn btn-outline-danger">
+    <input name="Logout" type="submit" value="Logout">
+  </form>
+</div>
+HERE;
+}
+
+// Setting up login status message
+$loginStatusMsg = <<< HERE
+<p>Logged in as
+  <span class="text-primary">
+  {{username}}
+  </span>
+  {{guest_user_message}}
+</p>
+HERE;
+
+// Sustitute username into login status message
+$loginStatusMsg = str_replace("{{username}}", $_SESSION['username'], $loginStatusMsg);
+
+// Show whether user is a guest
+if(isset($_SESSION['guest_id'])){
+	$loginStatusMsg = str_replace("{{guest_user_message}}", "(Guest user)", $loginStatusMsg);
+}
+else{
+	$loginStatusMsg = str_replace("{{guest_user_message}}", "", $loginStatusMsg);
+}
+
 // Setup authentication offcanvas
 $authOffcanvas = <<< HERE
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAuth" aria-labelledby="offcanvasAuthLabel">
@@ -74,19 +110,27 @@ $authOffcanvas = <<< HERE
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
+    {{login_status_message}}
     {{auth_accordion}}
+    {{logout_button}}
   </div>
 </div>
 HERE;
 
+// Add login status message at top of authentication offcanvas
+$authOffcanvas = str_replace("{{login_status_message}}", $loginStatusMsg, $authOffcanvas);
 // Substituting authentication accordion into the offcanvas body
 $authOffcanvas = str_replace("{{auth_accordion}}", $authAccordion, $authOffcanvas);
+// Adding logout button right below authentication accordion
+$authOffcanvas = str_replace("{{logout_button}}", $logoutButton, $authOffcanvas);
 
 // Setting up profile button with username and icon
 $profileButton = <<< HERE
-<button id="profile-btn" class="btn btn-outline-primary me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAuth" aria-controls="offcanvasAuth">
+<button id="profile-btn" class="btn btn-outline-primary ms-auto me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAuth" aria-controls="offcanvasAuth">
   {{profile_icon}}
-  {{username}}
+  <span class='d-none d-sm-inline'>
+    {{username}}
+  </span>
 </button>
 HERE;
 
@@ -105,7 +149,7 @@ $themeButton = <<< HERE
     <svg class="bi theme-icon-active" width="1.3rem" height="1.3rem">
       <use href="#moon-stars-fill" fill="currentcolor"></use>
     </svg>
-    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
+    <span class="d-none ms-2" id="bd-theme-text">Toggle theme</span>
   </button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
     <li>
@@ -131,39 +175,6 @@ $themeButton = <<< HERE
     </li>
   </ul>
 </div>
-<!--
-<li class="nav-item dropdown">
-  <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (dark)">
-    <svg class="bi my-1 theme-icon-active">
-      <use href="#moon-stars-fill"></use>
-    </svg>
-    <span class="d-lg-none ms-2" id="bd-theme-text">Toggle theme</span>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
-    <li>
-      <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
-        <svg class="bi me-2 opacity-50 theme-icon"><use href="#sun-fill"></use></svg>
-        Light
-        <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
-      </button>
-    </li>
-    <li>
-      <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="dark" aria-pressed="true">
-        <svg class="bi me-2 opacity-50 theme-icon"><use href="#moon-stars-fill"></use></svg>
-        Dark
-        <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
-      </button>
-    </li>
-    <li>
-      <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
-        <svg class="bi me-2 opacity-50 theme-icon"><use href="#circle-half"></use></svg>
-        Auto
-        <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
-      </button>
-    </li>
-  </ul>
-</li>
-  -->
 HERE;
 
 $icons = <<< HERE
@@ -182,30 +193,17 @@ $icons = <<< HERE
   </symbol>
 </svg>
 HERE;
+
 // Finally setting up navbar
 $navbar = <<< HERE
 <nav class='navbar mb-1 navbar-expand-md navbar-dark static-top bg-dark'>
   <div class='container-fluid'>
-    <a class='navbar-brand' href='#'>TicTacToe</a>
-    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarCollapse' aria-controls='navbarCollapse' aria-expanded='false' aria-label='Toggle navigation'>
+    <button class='navbar-toggler border-0 me-auto' type='button' data-bs-toggle='offcanvas' data-bs-target='#tableOfContents' aria-label='TOC'>
       <span class='navbar-toggler-icon'></span>
     </button>
-    <div class='collapse navbar-collapse' id='navbarCollapse'>
-      <ul class='navbar-nav me-auto mb-2 mb-md-0'>
-        <li class='nav-item'>
-          <a class='nav-link active' href='?page=home'>Home</a>
-        </li>
-        <li class='nav-item'>
-          <a class='nav-link' href='?page=game'>Game Room</a>
-        </li>
-        <li class='nav-item'>
-          <a class='nav-link' href='?page=history'>Match history</a>
-        </li>
-      </ul>
-    </div>
-
+    <a class='navbar-brand' href='/'>TicTacToe</a>
+    {{table_of_contents}}
     {{profile_button}}
-    {{logout_button}}
     {{theme_button}}
   </div>
 </nav>
@@ -213,20 +211,34 @@ $navbar = <<< HERE
 {{auth_offcanvas}}
 HERE;
 
+$tocOffcanvas = <<< HERE
+<div class='offcanvas offcanvas-start' id='tableOfContents'>
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="bdSidebarOffcanvasLabel">Browse pages</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdSidebar"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class='navbar-nav me-auto mb-2 mb-md-0'>
+      <li class='nav-item'>
+        <a class='nav-link' href='?page=lobby'>Lobby</a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' href='?page=game'>Game Room</a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' href='?page=history'>Match history</a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' href='?page=about'>About page</a>
+      </li>
+    </ul>
+  </div>
+</div>
+HERE;
+
+$navbar = str_replace("{{table_of_contents}}", $tocOffcanvas, $navbar);
 $navbar = str_replace("{{auth_offcanvas}}", $authOffcanvas, $navbar);
 $navbar = str_replace("{{profile_button}}", $profileButton, $navbar);
 $navbar = str_replace("{{theme_button}}", $themeButton, $navbar);
 
-$logoutButton = "";
-// If user is guest, logout button is unnecessary
-if(!isset($_SESSION['guest_id'])){
-	// Setting up logout button
-	$logoutButton = <<< HERE
-<form action="api/logout.php" method="post" class="btn btn-outline-danger">
-  <input name="Logout" type="submit" value="Logout">
-</form>
-HERE;
-}
-
-$navbar = str_replace("{{logout_button}}", $logoutButton, $navbar);
 $navbar = $icons . $navbar;

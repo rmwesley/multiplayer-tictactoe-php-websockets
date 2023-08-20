@@ -1,16 +1,32 @@
 class MessageArea {
 	constructor(element){
 		this.area = element;
+		this.date = null;
 	}
 	checkAdmin(source){
 		return source == "admin" || source == "rmwesley";
 	}
+	addDateDivider() {
+		let date = document.createElement("div");
+		date.classList.add("date");
+
+		let dateText = document.createElement("span");
+		dateText.classList.add("date-string");
+		dateText.classList.add("bg-body-secondary");
+		dateText.innerHTML = this.date;
+
+		date.appendChild(dateText);
+
+		this.area.appendChild(date);
+	}
 
 	addSystemMessage(source, content) {
 		let message = document.createElement("div");
+		message.classList.add("message");
 
 		let messageUsername = document.createElement("span");
 		messageUsername.className = "chat-msg-username";
+		messageUsername.classList.add("local");
 		messageUsername.innerHTML = source;
 
 		let messageContent = document.createElement("span");
@@ -24,6 +40,7 @@ class MessageArea {
 	}
 	addMessage(source, content, time) {
 		let message = document.createElement("div");
+		message.classList.add("message");
 
 		let messageUsername = document.createElement("span");
 		messageUsername.className = "chat-msg-username";
@@ -37,10 +54,18 @@ class MessageArea {
 		messageContent.className = "chat-msg-content";
 		messageContent.innerHTML = content;
 
+		let msgDate = new Date(1000 * time);
+
 		let messageTime = document.createElement("span");
 		messageTime.className = "chat-msg-time";
-		messageTime.innerHTML = time;
+		messageTime.innerHTML = msgDate.toLocaleTimeString("pt-BR");
 
+		let dateString = msgDate.getDate() + "/" + (msgDate.getMonth() + 1) + "/" + msgDate.getFullYear();
+
+		if(this.date !== dateString){
+			this.date = dateString;
+			this.addDateDivider();
+		}
 		message.appendChild(messageUsername);
 		message.appendChild(messageContent);
 		message.appendChild(messageTime);
@@ -51,6 +76,7 @@ class MessageArea {
 
 function startChatBox() {
 	chatbox = document.getElementById("chatbox");
+	messagesElement = chatbox.querySelector(".messages");
 	messageArea = new MessageArea(chatbox.querySelector(".messages"));
 	typingInputField = chatbox.querySelector(".write_msg");
 	sendBtn = chatbox.querySelector(".msg_send_btn");
@@ -69,21 +95,20 @@ function startChatBox() {
 			}));
 		});
 
-		messageArea.addSystemMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't divulge your crimes. Go to the dark web for that.")
+		messageArea.addSystemMessage("LOCAL_SYSTEM", "This chat is not even *remotely* encrypted, so don't go divulging your crimes. Go to the dark web for that.")
 	}
 	chatSocket.onmessage = function (event) {
 		message = JSON.parse(event.data);
 		if(message.type == "new_message"){
-			dateString = new Date(1000 * message.time).toLocaleTimeString();
-			messageArea.addMessage(message.source, message.content, dateString);
+			messageArea.addMessage(message.source, message.content, message.time);
 		}
 		if(message.type == "history"){
 			message.history.forEach((chat_msg) => {
 				if(chat_msg == null) return;
-				dateString = new Date(1000 * chat_msg[2]).toLocaleTimeString();
-				messageArea.addMessage(chat_msg[0], chat_msg[1], dateString);
+				messageArea.addMessage(chat_msg[0], chat_msg[1], chat_msg[2]);
 			});
 		}
+		messagesElement.scrollTo(0, messagesElement.scrollHeight);
 	}
 
 	function sendMessage(){
@@ -110,10 +135,14 @@ function draggableChatBox(chatbox, header) {
 	var initialX = 0, initialY = 0, deltaX = 0, deltaY = 0;
 
 	header.onmousedown = dragMouseDown;
+	header.ontouchstart = dragTouchStart;
 
 	function dragMouseDown(e) {
 		e = e || window.event;
 		e.preventDefault();
+
+		// Only left mouse button can drag
+		if (e.button !== 0) return;
 
 		// Get cursor position
 		initialX = e.clientX;
@@ -123,11 +152,18 @@ function draggableChatBox(chatbox, header) {
 		// Call a function whenever the cursor moves
 		document.onmousemove = elementDrag;
 	}
+	function dragTouchStart(e) {
+		// Get cursor position
+		initialX = e.touches[0].clientX;
+		initialY = e.touches[0].clientY;
+
+		document.addEventListener("touchend", closeTouch);
+
+		//document.ontouchmove = (event) => {
+		document.addEventListener("touchmove", elementDragTouch);
+	}
 
 	function elementDrag(e) {
-		e = e || window.event;
-		e.preventDefault();
-
 		// Calculate the cursor displacement
 		deltaX = e.clientX - initialX;
 		deltaY = e.clientY - initialY;
@@ -138,15 +174,18 @@ function draggableChatBox(chatbox, header) {
 		// Update the chatbox's position
 		chatbox.style.top = (chatbox.offsetTop + deltaY) + "px";
 		chatbox.style.left = (chatbox.offsetLeft + deltaX) + "px";
-
-		// Buggy simple solution, but corner is fixed at cursor position
-		//chatbox.style.left = e.clientX + "px";
-		//chatbox.style.top = e.clientY + "px";
 	}
 
+	function elementDragTouch(event) {
+		elementDrag(event.touches[0]);
+	}
 	function closeDragElement() {
 		// Stop moving when mouse button is released
 		document.onmouseup = null;
 		document.onmousemove = null;
+	}
+	function closeTouch() {
+		document.removeEventListener("touchend", closeTouch);
+		document.removeEventListener("touchmove", elementDragTouch);
 	}
 }

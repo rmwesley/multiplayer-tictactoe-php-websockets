@@ -1,21 +1,22 @@
 <?php
-$page_list = array(
-  array(
-    "name"=>"home",
-    "title"=>"TicTacToe"),
-  array(
-    "name"=>"lobby",
-    "title"=>"About"),
-  array(
-    "name"=>"game",
-    "title"=>"Match"),
-  array(
-    "name"=>"history",
-    "title"=>"History"),
-  array(
-    "name"=>"contacts",
-    "title"=>"About")
-);
+$page_list = [
+	[
+		"name"=>"lobby",
+		"title"=>"Lobby",
+	],
+	[
+		"name"=>"game",
+		"title"=>"Match",
+	],
+	[
+		"name"=>"history",
+		"title"=>"Match History",
+	],
+	[
+		"name"=>"about",
+		"title"=>"About page",
+	],
+];
 
 function checkPage($askedPage){
 	global $page_list;

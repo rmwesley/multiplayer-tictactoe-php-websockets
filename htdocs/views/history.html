@@ -13,7 +13,7 @@
     <script src="assets/js/history.js"></script>
   </head>
   <body>
-    <div class="accordion" id="historyAccordion">
+    <div class="accordion mb-5" id="historyAccordion">
       <div class="accordion-item">
         <h2 class="accordion-header">
           <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#history" aria-expanded="true" aria-controls="collapseOne">
@@ -21,7 +21,7 @@
           </button>
         </h2>
         <div id="history" class="accordion-collapse collapse show" data-bs-parent="#historyAccordion">
-          <div class="accordion-body">
+          <div class="accordion-body overflow-auto">
             <div class="collapse show" id='matchHistory' aria-expanded="true">
               {{game_history}}
             </div>
