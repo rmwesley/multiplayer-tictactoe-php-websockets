@@ -1,9 +1,16 @@
 // Global DOM elements
 var playerElement, opponentElement;
 // Global variables
-var room_id;
+var room_id, refreshIntervalId;
 var waitingRoomWs;
 
+function pingServer() {
+	// Don't send ping if tab is not active or Play has not been pressed
+	if(document.visibilityState !== "visible") return; 
+
+	// Ping the server to keep connection alive
+	waitingRoomWs.send(JSON.stringify({ type: "ping"}));
+}
 function clientWebSocketInit() {
 	waitingRoomWs = new WebSocket("wss://127.0.0.1:8080");
 
@@ -16,9 +23,18 @@ function clientWebSocketInit() {
 				"guestUser": data.guestUser
 			}));
 		})
+		// Keep the id so that it can be closed when WS closes
+		refreshIntervalId = setInterval(pingServer, 30000);
+
+		// Send ping when visibility of page changes
+		document.addEventListener("visibilitychange", () => {
+			sendPing();
+		});
 	};
 
 	waitingRoomWs.onclose = (event) => {
+		clearInterval(refreshIntervalId);
+
 		// User was inactive and was removed from match queue
 		if(event.code == 4001){
 			// Showing inactivity popup message

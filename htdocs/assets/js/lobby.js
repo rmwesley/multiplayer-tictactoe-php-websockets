@@ -20,7 +20,7 @@ window.onload = () => {
 		clearTicks();
 	});
 
-	// Enter is equivalent to click on Play/Cancel
+	// Clicking on infobox focuses on main lobby button
 	document.querySelector(".infobox").addEventListener("click", (event) =>{
 		if(!pressedPlay){
 			playBtn.querySelector("button").focus();
